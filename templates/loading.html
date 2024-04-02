@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>loading</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='loading.css') }}">
+</head>
+<body>
+        <div class="container">
+            <div  id="myDIV" class="header">
+                <h1 onload="myFunction()">
+                    <span>H</span>
+                    <span>e</span>
+                    <span>l</span>
+                    <span>l</span>
+                    <span>o</span>
+                </h1>
+            </div>
+        </div>
+    </div>
+    <script>
+        const div1 = document.getElementById("myDIV");
+
+        div1.addEventListener("animationend", myEndFunction);
+        
+        function myEndFunction() {
+          if (event.animationName == "slide-right") {
+            window.location.href = 'http://127.0.0.1:5000/dashboard';
+          }
+          else {
+            return;
+          }
+        }
+        </script>
+</body>
+</html>

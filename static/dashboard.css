@@ -1,0 +1,141 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url("./3348264.jpg");
+    background-size: cover;
+    overflow: hidden;
+    background-color: #d6cfe5; 
+    color: #333;
+}
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    height: 100vh;
+    width: 40vw;
+    min-width: 400px;
+    border-radius: 25px;
+}
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+h1 {
+    font-size: 1.5rem;
+    text-align: left;
+    color: #29203f;
+    margin-bottom: 20px;
+} 
+
+.task-list {
+    list-style-type: none;
+    padding: 0;
+}
+.date {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #666;
+    font-weight: 200;
+}
+.task {
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+.task:hover {
+    transform: translateY(-5px);
+}
+.task p {
+    font-size: 1.1rem;
+    color: #666;
+    align-items: left; 
+}
+.task span {
+    font-size: 1.1rem;
+    color: #666;
+    align-items: left; 
+}
+.task p1 {
+    font-size: 1.6rem;
+    color: #29203f; 
+}
+.vl {
+    border-left: 3px solid  rgb(15,0,85);
+    height: 80px;
+    position: relative;
+    left: 125px; 
+    top: 0;
+    float: left;
+}
+.activity {
+    position: relative;
+    left: 106px;
+}
+.priority {
+    position: relative;
+    left: 150px;
+}
+.add-task-btn {
+    margin-top: 20px;
+}
+.fa {
+    float: left;
+    margin-top: 20px;
+    margin-left: 20px;
+    font-size: 25px;
+    color: #bfbfbf;
+}
+.fa:hover {
+    cursor: pointer;
+}
+/* The side navigation menu */
+.sidenav {
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    background-color: rgba(64, 55, 67, 0.5); /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+  }
+  
+  /* The navigation menu links */
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #c2c2c2;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  /* When you mouse over the navigation links, change their color */
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+  
+  /* Position and style the close button (top right corner) */
+  .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+  
+  /* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+  #main {
+    transition: margin-left .5s;
+    padding: 20px;
+  }
+  
+  /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+  @media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+  }

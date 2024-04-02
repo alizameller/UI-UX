@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='signup.css') }}">
+</head>
+<body>
+    <header class="header">
+        <script>
+            function handleOnClick() {
+                window.location.href = 'http://127.0.0.1:5000';
+              }
+            </script>
+            <h1 onclick="handleOnClick()">task manager</h1>
+    </header>
+    <div class="container">
+        <div class="form">
+            <h1>Login</h1>
+            <!-- Login form here -->
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+            <!-- <a href="/dashboard" class="btn">Login</a> -->
+            <a href="/dashboard"><button>Login</button></a>
+            <div class="signup-link">Don't have an account? <a href="/signup">Sign up here</a></div>
+        </div>
+    </div>
+</body>
+</html>

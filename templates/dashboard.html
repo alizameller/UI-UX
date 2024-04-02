@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <script src="https://kit.fontawesome.com/0e71ef810d.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="/dashboard">Home</a>
+        <a href="/monthly_calendar">Calendar</a>
+        <a href="/monthly_calendar">Assignments</a>
+        <a href="#">Settings</a>
+        <a href="/">Logout</a>
+    </div>
+        
+    <!-- Use any element to open the sidenav -->
+    <span class="fa fa-bars" id="menuBars" onclick="openNav()"></span>
+        
+    <!-- Add all page content inside this div if you want the side nav to push page content to the right (not used if you only want the sidenav to sit on top of the page -->
+    <div id="main">
+        <div class="container">
+            <div class="header">
+                <h1>Your agenda</h1>
+            </div>
+            <div class="task-list">
+                {% for task in tasks %}
+                <!-- THIS IS WHERE I WANT IT-->
+                <script>
+                    var div = document.createElement('div'), // Create a new div
+                    script = document.scripts[document.scripts.length - 1]; // A reference to the currently running script
+                    div.className = "date";
+                    var date = new Date("{{ task.start_time }}");
+                    div.innerHTML = new Intl.DateTimeFormat('en-US', {day: 'numeric', month: 'long'}).format(date) + ":";
+                    script.parentElement.insertBefore(div, script); // Add the newly-created div to the page
+                </script>
+                <div class="task">
+                    <!-- <h3>{{ task.name }}</h3>
+                    <p>Details of {{ task.name }}</p> -->
+                        <p>
+                            <p1 id="{{ task.name }} start">Hello</p1> 
+                            <script>
+                                var element = document.getElementById("{{ task.name }} start");
+                                var date = new Date("{{ task.start_time }}");
+                                // element.innerHTML = date.getHours() + ":" + date.getMinutes();
+                                element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: '2-digit', minute: 'numeric',}).format(date);
+                            </script>
+                            <span class="vl"></span>
+                            <span class="activity" style="color: rgb(15,0,85);">{{ task.name }}</span>
+                        </p>
+                        <p>
+                            <p2 id="{{ task.name }} end">Hello</p2> 
+                            <script>
+                                var element = document.getElementById("{{ task.name }} end");
+                                var date = new Date("{{ task.end_time }}");
+                                //element.innerHTML = date.getHours() + ":" + date.getMinutes();
+                                element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: 'numeric',}).format(date);
+                            </script>
+                            <span class="priority" style="font-size: 0.8rem;">Priority: {{ task.priority }}</span>
+                        </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>  
+    </div>
+    <script>
+        /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
+        function openNav() {
+            document.getElementById("menuBars").style.visibility = 'hidden';
+            document.getElementById("mySidenav").style.width = "250px";
+            document.getElementById("main").style.marginLeft = "250px";
+        }
+
+        /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+            document.getElementById("main").style.marginLeft = "0";
+            document.getElementById("menuBars").style.visibility = 'visible';
+        }
+    </script>
+</body>
+</html>

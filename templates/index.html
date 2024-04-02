@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>task manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="shortcut icon"href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+    <header class="header">
+        <script>
+        function handleOnClick() {
+            window.location.href = 'http://127.0.0.1:5000';;
+          }
+        </script>
+        <h1 onclick="handleOnClick()">task manager</h1>
+        <a href="/login" class='btn'>Sign In</a>
+    </header>
+
+    <section id="hero" class="hero">
+        <div class="container">
+            <h2>Effortlessly manage your tasks and assignments with <u>task manager</u></h2>
+            <p>Stay organized, prioritize tasks, and achieve your goals efficiently.</p>
+            <a href="/signup" class='btn_signup'>Get Started</a>
+        </div>
+    </section>
+</body>
+</html>

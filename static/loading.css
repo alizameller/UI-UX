@@ -1,0 +1,68 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    overflow: hidden;
+    width: 100%;
+    margin-left: 250px;
+    max-width: 500px
+}
+
+h1 span {
+    display: inline-block;
+    animation-name: test, slide-right;
+    animation-duration: 2s, 2s;
+    animation-iteration-count: 1, 1, 1;
+}
+
+h1 span:nth-child(1) {
+    animation-delay: 0.25s, 2.6s;
+}
+
+h1 span:nth-child(2) {
+    animation-delay: 0.5s, 2.6s;
+}
+
+h1 span:nth-child(3) {
+    animation-delay: 0.75s, 2.6s;
+}
+
+h1 span:nth-child(4) {
+    animation-delay: 1s, 2.6s;
+}
+
+h1 span:nth-child(5) {
+    animation-delay: 1.25s, 2.6s;
+}
+  
+@keyframes test {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-25px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+  
+  @keyframes slide-right {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-500px);
+    }
+  }
