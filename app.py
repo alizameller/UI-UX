@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine, text, Integer, String, Column, DateTime, ForeignKey, PrimaryKeyConstraint, func, select
 from sqlalchemy.orm import sessionmaker, declarative_base, backref, relationship
+from datetime import datetime, timedelta
 
 # this variable, db, will be used for all SQLAlchemy commands
 db = SQLAlchemy()
@@ -26,6 +27,24 @@ tasks = [
 ]
 
 colors = {"Databases": "rgb(226, 0, 246)", "UI/UX": "rgb(73, 246, 250)", "Senior Projects": "gray"}
+
+# Task Model
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    Task_id = db.Column(db.Integer, primary_key=True)
+    Userid = db.Column(db.Integer, nullable=False)
+    Task_name = db.Column(db.String(100), nullable=False)
+    Task_details = db.Column(db.String(500))
+    Task_duration = db.Column(db.Interval)
+    Deadline = db.Column(db.Date)
+
+# Activity model
+class Activity(db.Model):
+    __tablename__ = 'activities'
+    activity_id = db.Column(db.Integer, primary_key=True)
+    activity_name = db.Column(db.String(100), nullable=False)
+    Userid = db.Column(db.Integer, nullable=False)
+    time = db.Column(db.DateTime, nullable=False)
 
 @app.route('/')
 def index():
@@ -68,6 +87,52 @@ def test_db():
         error_text = "<p>The error:<br>" + str(e) + "</p>"
         hed = '<h1>Something is broken.</h1>'
         return hed + error_text
+
+#Hardcoded data for now. can replace with passed in data
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    user_id = 1
+    task_name = "Develop Flask App"
+    task_details = "Create a RESTful service with Flask"
+    task_duration = 3600  
+    deadline = "2024-05-10"
+
+    try:
+        new_task = Task(
+            Userid=user_id,
+            Task_name=task_name,
+            Task_details=task_details,
+            Task_duration=datetime.timedelta(seconds=task_duration),
+            Deadline=datetime.datetime.strptime(deadline, '%Y-%m-%d').date()
+        )
+        db.session.add(new_task)
+        db.session.commit()
+        return "Task added successfully", 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return f"An error occurred: {str(e)}", 500
+
+#Hardcoded data for now. can replace with passed in data
+@app.route('/add_activity', methods=['POST'])
+def add_activity():
+    user_id = 1
+    activity_name = "Team Meeting"
+    time = "2024-05-10 14:00:00"
+
+    try:
+        new_activity = Activity(
+            Userid=user_id,
+            activity_name=activity_name,
+            time=datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+        )
+        db.session.add(new_activity)
+        db.session.commit()
+        return "Activity added successfully", 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return f"An error occurred: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
