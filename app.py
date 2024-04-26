@@ -11,7 +11,7 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:mysecretpassword@localhost:5432/final_project"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
@@ -28,23 +28,28 @@ tasks = [
 
 colors = {"Databases": "rgb(226, 0, 246)", "UI/UX": "rgb(73, 246, 250)", "Senior Projects": "gray"}
 
-# Task Model
-class Task(db.Model):
-    __tablename__ = 'tasks'
-    Task_id = db.Column(db.Integer, primary_key=True)
-    Userid = db.Column(db.Integer, nullable=False)
-    Task_name = db.Column(db.String(100), nullable=False)
-    Task_details = db.Column(db.String(500))
-    Task_duration = db.Column(db.Interval)
-    Deadline = db.Column(db.Date)
+#Table SQL ALCHEMY Models 
+class User(db.Model):
+    __tablename__ = 'users'
+    email = db.Column(db.String(100), primary_key=True)
+    userid = db.Column(db.Integer, autoincrement=True) 
+    password = db.Column(db.String(100))
 
-# Activity model
 class Activity(db.Model):
     __tablename__ = 'activities'
-    activity_id = db.Column(db.Integer, primary_key=True)
-    activity_name = db.Column(db.String(100), nullable=False)
-    Userid = db.Column(db.Integer, nullable=False)
-    time = db.Column(db.DateTime, nullable=False)
+    activity_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    activity_name = db.Column(db.String(100), primary_key=True)
+    userid = db.Column(db.Integer, db.ForeignKey('users.userid'), primary_key=True)
+    time = db.Column(db.Date, primary_key=True)
+
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer, db.ForeignKey('users.userid'), primary_key=True)
+    task_name = db.Column(db.String(100))
+    task_details = db.Column(db.String(500))
+    task_duration = db.Column(db.Interval)
+    deadline = db.Column(db.Date)
 
 @app.route('/')
 def index():
@@ -88,7 +93,9 @@ def test_db():
         hed = '<h1>Something is broken.</h1>'
         return hed + error_text
 
-#Hardcoded data for now. can replace with passed in data
+from datetime import datetime, timedelta
+
+#Hardcoded data for now.
 @app.route('/add_task', methods=['POST'])
 def add_task():
     user_id = 1
@@ -99,40 +106,38 @@ def add_task():
 
     try:
         new_task = Task(
-            Userid=user_id,
-            Task_name=task_name,
-            Task_details=task_details,
-            Task_duration=datetime.timedelta(seconds=task_duration),
-            Deadline=datetime.datetime.strptime(deadline, '%Y-%m-%d').date()
+            userid=user_id, 
+            task_name=task_name,
+            task_details=task_details,
+            task_duration=timedelta(seconds=task_duration),
+            deadline=datetime.strptime(deadline, '%Y-%m-%d').date()
         )
         db.session.add(new_task)
         db.session.commit()
         return "Task added successfully", 200
-    
     except Exception as e:
         db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
+        return "An error occurred: {}".format(str(e)), 500
 
-#Hardcoded data for now. can replace with passed in data
+#Hardcoded data for now.
 @app.route('/add_activity', methods=['POST'])
 def add_activity():
-    user_id = 1
+    user_id = 1  
     activity_name = "Team Meeting"
-    time = "2024-05-10 14:00:00"
+    time = "2024-05-10"  
 
     try:
         new_activity = Activity(
-            Userid=user_id,
+            userid=user_id,
             activity_name=activity_name,
-            time=datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+            time=datetime.strptime(time, '%Y-%m-%d').date()  
         )
         db.session.add(new_activity)
         db.session.commit()
         return "Activity added successfully", 200
-    
     except Exception as e:
         db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
+        return "An error occurred: {0}".format(str(e)), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
