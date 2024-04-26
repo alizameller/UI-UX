@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from sqlalchemy import create_engine, text, Integer, String, Column, DateTime, ForeignKey, PrimaryKeyConstraint, func, select
 from sqlalchemy.orm import sessionmaker, declarative_base, backref, relationship
+from datetime import datetime, timedelta
 
 # this variable, db, will be used for all SQLAlchemy commands
 db = SQLAlchemy()
@@ -91,7 +92,7 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).all()
+    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.start_time).desc()).all()
     print(new_tasks)
     return render_template('dashboard.html', tasks=new_tasks, colors=colors)
 
@@ -114,6 +115,61 @@ def test_db():
         error_text = "<p>The error:<br>" + str(e) + "</p>"
         hed = '<h1>Something is broken.</h1>'
         return hed + error_text
+
+#Hardcoded data for now.
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    user_id = 1
+    task_id = 3
+    task_name = "Task 3"
+    task_details = "Details of Task 3"
+    activity_id = 2
+    task_duration = 3600  
+    deadline = "2024-05-10"
+    start_time = "2024-04-10T12:40"
+    end_time = "2024-04-10T15:30"
+    format_data = '%Y-%m-%dT%H:%M'
+
+    try:
+        new_task = Tasks(
+            userid=user_id, 
+            task_id=task_id,
+            activity_id = activity_id,
+            task_name=task_name,
+            task_details=task_details,
+            task_duration=timedelta(seconds=task_duration),
+            deadline=datetime.strptime(deadline, '%Y-%m-%d').date(), 
+            start_time = datetime.strptime(start_time, format_data),
+            end_time = datetime.strptime(end_time, format_data)
+        )
+        db.session.add(new_task)
+        db.session.commit()
+        return "Task added successfully", 200
+    except Exception as e:
+        db.session.rollback()
+        return "An error occurred: {}".format(str(e)), 500
+
+#Hardcoded data for now.
+@app.route('/add_activity', methods=['POST'])
+def add_activity():
+    user_id = 1  
+    activity_name = "Team Meeting"
+    time = "2024-05-10"  
+    activity_id = 2
+
+    try:
+        new_activity = Activities(
+            userid=user_id,
+            activity_id = activity_id,
+            activity_name=activity_name,
+            time=datetime.strptime(time, '%Y-%m-%d').date()  
+        )
+        db.session.add(new_activity)
+        db.session.commit()
+        return "Activity added successfully", 200
+    except Exception as e:
+        db.session.rollback()
+        return "An error occurred: {0}".format(str(e)), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
