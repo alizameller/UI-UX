@@ -4,5 +4,14 @@
     <meta charset="UTF-8">
   </head>
   <body>
+    <div class="content">
+        {% for user in users %}
+            <div class="user">
+                <p><b>#{{ user.userid }}</b></p>
+                <b>
+                    <p class="email">{{ user.email }}</p>
+                </b>
+            </div>
+        {% endfor %}
   </body>
 </html>
