@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import pyotp
 from sqlalchemy.sql import text
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine, text, Integer, String, Column, DateTime, ForeignKey, PrimaryKeyConstraint, func, select
@@ -44,7 +45,7 @@ def login():
         masterkey = data.get('password')
         engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
         db = engine.connect()
-        cursor = db.execute(text(f'SELECT password FROM login_table WHERE username = \'{username}\''))
+        cursor = db.execute(text(f'SELECT password FROM users WHERE username = \'{username}\''))
         password = cursor.fetchall()
         if not password:
             
@@ -55,8 +56,8 @@ def login():
 
         session['username'] = username
         session['authenticated'] = False
-   
-        return jsonify({'message': 'Login successful'})
+        db.close()
+        #return jsonify({'message': 'Login successful'})
         # Handle login logic here
         return redirect(url_for('dashboard'))
     return render_template('login.html')
@@ -64,8 +65,25 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        db = engine.connect()
+        cursor = db.execute(text(f'SELECT email FROM users WHERE email = \'{email}\''))
+        user = cursor.fetchall()
+
+        if user:
+            return jsonify({'message': 'Email already has an associated account'}), 400
+
+        db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
+        db.commit()
+        db.close()
+
+        #return jsonify({'message': 'Registration successful'})
         # Handle signup logic here
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('login'))
     return render_template('signup.html')
 
 @app.route('/dashboard')

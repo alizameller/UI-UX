@@ -19,12 +19,38 @@
         <div class="form">
             <h1>Sign Up</h1>
             <!-- Signup form here -->
-            <input type="text" placeholder="Name">
-            <input type="email" placeholder="Email">
-            <input type="password" placeholder="Password">
-            <a href="/dashboard"><button>Sign Up</button></a>
+            <form id="signupForm">
+                <input type="email" id="email" name = "email"placeholder="Email">
+                <input type="password" id="password" name="password" placeholder="Password">
+                <button type="submit">Sign Up</button>
+            </form>
             <div class="login-link">Already have an account? <a href="/login">Login here</a></div>
         </div>
     </div>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({  email, password })
+            })
+            .then(response => {
+                if (response.status == 200){
+                    return response.json()
+                }
+                alert("Error registering: " + response.statusText)
+                throw new Error(response.status)
+            })
+            .then(data => {
+                window.location.href = '/setup'
+            });
+        });
+    </script>
 </body>
 </html>
