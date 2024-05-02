@@ -30,5 +30,30 @@
             <div class="signup-link">Don't have an account? <a href="/signup">Sign up here</a></div>
         </div>
     </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({  email, password })
+            })
+            .then(response => {
+                if (response.status == 200){
+                    return response.json()
+                }
+                alert("Error registering: " + response.statusText)
+                throw new Error(response.status)
+            })
+            .then(data => {
+                window.location.href = '/setup'
+            });
+        });
+    </script>
 </body>
 </html>

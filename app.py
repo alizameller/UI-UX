@@ -41,11 +41,11 @@ def index():
 def login():
     if request.method == 'POST':
         data = request.get_json()
-        username = data.get('username')
+        email = data.get('email')
         masterkey = data.get('password')
         engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
         db = engine.connect()
-        cursor = db.execute(text(f'SELECT password FROM users WHERE username = \'{username}\''))
+        cursor = db.execute(text(f'SELECT password FROM users WHERE email = \'{email}\''))
         password = cursor.fetchall()
         if not password:
             
@@ -54,12 +54,10 @@ def login():
         if not check_password_hash(password[0][0], masterkey):
             return jsonify({'message': 'Incorrect password'}), 401
 
-        session['username'] = username
-        session['authenticated'] = False
+        session['username'] = email
         db.close()
-        #return jsonify({'message': 'Login successful'})
-        # Handle login logic here
         return redirect(url_for('dashboard'))
+        #return render_template('dashboard.html', tasks=tasks, colors=colors)
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
