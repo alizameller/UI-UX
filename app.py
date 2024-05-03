@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify2
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import pyotp
@@ -17,8 +17,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:543
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-
-
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
