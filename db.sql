@@ -37,7 +37,9 @@ INSERT INTO users (email, userid, password) VALUES ('giuseppe@pizza.com', 4, 'pa
 
 INSERT INTO activities (activity_id, activity_name, userid, time) VALUES (0, 'Senior Projects', 1, '2024-04-08 15:40:00');
 INSERT INTO activities (activity_id, activity_name, userid, time) VALUES (1, 'Databases', 1, '2024-04-08 15:40:00');
+INSERT INTO activities (activity_id, activity_name, userid, time) VALUES (2, 'UI/UX', 1, '2024-04-08 15:40:00');
 
 INSERT INTO tasks (task_id, userid, activity_id, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (1, 1, 0, 'Homework', 'Details of Task 1', NULL, NULL, '2024-04-08T15:40', '2024-04-08T17:00');
 INSERT INTO tasks (task_id, userid, activity_id, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (2, 1, 1, 'Presentation', 'Details of Task 2', NULL, NULL, '2024-04-09T12:40', '2024-04-09T15:00');
+INSERT INTO tasks (task_id, userid, activity_id, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (4, 1, 2, 'Homework', 'Details', NULL, NULL, '2024-04-09T12:40', '2024-04-09T15:00');
 UPDATE tasks SET task_duration = AGE(end_time, start_time)  WHERE task_id = 1;
