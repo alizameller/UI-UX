@@ -59,7 +59,7 @@
                         <!-- <h3>{{ task.name }}</h3>
                         <p>Details of {{ task.name }}</p> -->
                             <p>
-                                <p1 id="{{ task.task_id }} start">Hello</p1> 
+                                <p1 id="{{ task.task_id }} start">12:00 AM</p1> 
                                 <script>
                                     var element = document.getElementById("{{ task.task_id }} start");
                                     var date = new Date("{{ task.start_time }}");
@@ -68,9 +68,10 @@
                                 </script>
                                 <span class="vl" id="{{task.activity_name}}"></span>
                                 <span class="task-item" style="color: rgb(15,0,85); font-size: 1.3rem;">{{ task.activity_name }}</span>
+                                <input type="checkbox" style="position: relative;"/>
                             </p>
                             <p>
-                                <p2 id="{{ task.task_id }} end">Hello</p2> 
+                                <p2 id="{{ task.task_id }} end">12:00 AM</p2> 
                                 <script>
                                     var element = document.getElementById("{{ task.task_id }} end");
                                     var date = new Date("{{ task.end_time }}");

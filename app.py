@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'mysecretkey'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
 
@@ -36,7 +37,7 @@ class Users(Base):
     __tablename__ = 'users'
 
     email = Column(String, primary_key = True)
-    userid = Column(Integer)
+    userid = Column(Integer, autoincrement=True)
     password = Column(String)
 
     def __repr__(self):
@@ -46,7 +47,7 @@ class Users(Base):
 class Tasks(Base):
     __tablename__ = 'tasks'
 
-    task_id = Column(Integer, primary_key = True)
+    task_id = Column(Integer, primary_key = True, autoincrement=True)
     userid = Column(Integer)
     task_name = Column(String)
     task_details = Column(String)
@@ -124,35 +125,53 @@ def events():
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
     if request.method == 'POST':
+        print((request.form['task_name']))
+        print((request.form['details']))
+        print((request.form['activity']))
+        # print((request.form['duration_hrs']))
+        # print((request.form['duration_mins']))
+        print((request.form['deadline']))
+        
         user_id = 1
-        task_id = 3
-        task_name = "Task 3"
-        task_details = "Details of Task 3"
-        activity_id = 2
-        task_duration = 3600  
-        deadline = "2024-05-10"
-        start_time = "2024-04-10T12:40"
-        end_time = "2024-04-10T15:30"
+        # task_id = 3
+        task_name = request.form['task_name']
+        task_details = request.form['details']
+        # activity_id = 2
+        task_duration = int(request.form['duration_hrs']) * 3600 + int((request.form['duration_mins'])) * 60
+        print(task_duration)
+        deadline = request.form['deadline']
+        end_time = request.form['deadline']
         format_data = '%Y-%m-%dT%H:%M'
+        id = db.session.query(Activities.activity_id).where(Activities.activity_name == request.form['activity']).all()
+        if id[0][0]:
+            activity_id = id[0][0]
+            print(activity_id)
 
         try:
             new_task = Tasks(
                 userid=user_id, 
-                task_id=task_id,
                 activity_id = activity_id,
                 task_name=task_name,
                 task_details=task_details,
                 task_duration=timedelta(seconds=task_duration),
-                deadline=datetime.strptime(deadline, '%Y-%m-%d').date(), 
-                start_time = datetime.strptime(start_time, format_data),
+                deadline=datetime.strptime(deadline, format_data), 
+                # start_time = datetime.strptime(start_time, format_data),
                 end_time = datetime.strptime(end_time, format_data)
             )
             db.session.add(new_task)
             db.session.commit()
-            return "Task added successfully\n", 200
+            flash('Task added successfully!')
+            # message = "Task added successfully!"
+            #return render_template('add_task.html')
         except Exception as e:
             db.session.rollback()
-            return "An error occurred: {}".format(str(e)), 500
+            if (type(e).__name__) == "IntegrityError":
+                message = "An internal error occured. \nPlease try again."
+            if (type(e).__name__) == "ValueError":
+                message = "An invalid datetime value was entered. \nPlease select a date from the dropdown calendar."
+            # message = "An error occurred: {}".format(str(e))
+            flash(message)
+            #return render_template('add_task.html')
     return render_template('add_task.html')
 
 #Hardcoded data for now.
