@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify2
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import pyotp
