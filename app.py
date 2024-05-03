@@ -11,9 +11,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base, backref, relationship
 db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
-app.secret_key = 'david_stekol'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:password@localhost:5432/final_project"
-
+app.config['SECRET_KEY'] = 'mysecretkey'
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -41,6 +40,7 @@ def index():
 def login():
     if request.method == 'POST':
         data = request.get_json()
+        print(data)
         email = data.get('email')
         masterkey = data.get('password')
         engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
@@ -48,16 +48,15 @@ def login():
         cursor = db.execute(text(f'SELECT password FROM users WHERE email = \'{email}\''))
         password = cursor.fetchall()
         if not password:
-            
             return jsonify({'message': 'User not found'}), 401
-
-        if not check_password_hash(password[0][0], masterkey):
+        elif not check_password_hash(password[0][0], masterkey):
             return jsonify({'message': 'Incorrect password'}), 401
-
-        session['username'] = email
-        db.close()
-        return redirect(url_for('dashboard'))
-        #return render_template('dashboard.html', tasks=tasks, colors=colors)
+        else: 
+            session['username'] = email
+            print(session['username'])
+            db.close()
+            return jsonify({'message': 'User not found'}), 200
+        # return render_template('dashboard.html', tasks=tasks, colors=colors)
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])

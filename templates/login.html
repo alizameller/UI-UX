@@ -45,13 +45,15 @@
             })
             .then(response => {
                 if (response.status == 200){
-                    return response.json()
+                    window.location.href = 'http://127.0.0.1:5000/dashboard'
                 }
-                alert("Error registering: " + response.statusText)
-                throw new Error(response.status)
+                else {
+                    alert("Error: " + response.status + "\nUnrecognized User")
+                    throw new Error(response.status)
+                }
             })
             .then(data => {
-                window.location.href = '/setup'
+                console.log(data)
             });
         });
     </script>
