@@ -7,19 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='add_task.css') }}">
     <script src="https://kit.fontawesome.com/0e71ef810d.js" crossorigin="anonymous"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script>
-
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          fixedWeekCount: false
-        });
-        calendar.render();
-      });
-
-    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 </head>
 
 <body>
@@ -45,7 +33,7 @@
                 <div class="header">
                     <h1>Add Task</h1>
                 </div>
-                <form action="{{ url_for('add_task') }}" method="post">
+                <form id="myForm" action="{{ url_for('add_task') }}" method="post">
                     <label for="task_name">Task Name</label>
                     <input type="text" id="task_name" name="task_name" placeholder="Task Name.." required="">
                   
@@ -68,13 +56,20 @@
                     <input type="datetime-local" id="deadline" name="deadline">
                   
                     <input type="submit" value="Submit">
-                  </form>
+                </form>
             </div>
-            <div class="container2">
-                <div class="header">
-                    <h1>Class Agenda</h1>
-                </div>
-            </div>
+        </div>
+        <div class="message">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <script>
+                    var messages = {{ messages | safe }};
+                    for (var i=0; i < messages.length; i++) {
+                        alert(messages[i]);
+                    }
+                </script>
+                {% endif %}
+          {% endwith %}
         </div>
     </div>
     <script>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'mysecretkey'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
 
@@ -127,8 +128,8 @@ def add_task():
         print((request.form['task_name']))
         print((request.form['details']))
         print((request.form['activity']))
-        print((request.form['duration_hrs']))
-        print((request.form['duration_mins']))
+        # print((request.form['duration_hrs']))
+        # print((request.form['duration_mins']))
         print((request.form['deadline']))
         
         user_id = 1
@@ -136,7 +137,8 @@ def add_task():
         task_name = request.form['task_name']
         task_details = request.form['details']
         # activity_id = 2
-        task_duration = 3600  
+        task_duration = int(request.form['duration_hrs']) * 3600 + int((request.form['duration_mins'])) * 60
+        print(task_duration)
         deadline = request.form['deadline']
         end_time = request.form['deadline']
         format_data = '%Y-%m-%dT%H:%M'
@@ -158,10 +160,18 @@ def add_task():
             )
             db.session.add(new_task)
             db.session.commit()
-            return "Task added successfully\n", 200
+            flash('Task added successfully!')
+            # message = "Task added successfully!"
+            #return render_template('add_task.html')
         except Exception as e:
             db.session.rollback()
-            return "An error occurred: {}".format(str(e)), 500
+            if (type(e).__name__) == "IntegrityError":
+                message = "An internal error occured. \nPlease try again."
+            if (type(e).__name__) == "ValueError":
+                message = "An invalid datetime value was entered. \nPlease select a date from the dropdown calendar."
+            # message = "An error occurred: {}".format(str(e))
+            flash(message)
+            #return render_template('add_task.html')
     return render_template('add_task.html')
 
 #Hardcoded data for now.
