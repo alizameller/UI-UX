@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify2
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import pyotp
@@ -128,7 +128,7 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.start_time).desc()).all()
+    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
     print(new_tasks)
     return render_template('dashboard.html', tasks=new_tasks, colors=colors)
 
