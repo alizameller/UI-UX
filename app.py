@@ -116,60 +116,67 @@ def test_db():
         hed = '<h1>Something is broken.</h1>'
         return hed + error_text
 
+@app.route('/events')
+def events():
+    return render_template('loading.html')
+
 #Hardcoded data for now.
-@app.route('/add_task', methods=['POST'])
+@app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
-    user_id = 1
-    task_id = 3
-    task_name = "Task 3"
-    task_details = "Details of Task 3"
-    activity_id = 2
-    task_duration = 3600  
-    deadline = "2024-05-10"
-    start_time = "2024-04-10T12:40"
-    end_time = "2024-04-10T15:30"
-    format_data = '%Y-%m-%dT%H:%M'
+    if request.method == 'POST':
+        user_id = 1
+        task_id = 3
+        task_name = "Task 3"
+        task_details = "Details of Task 3"
+        activity_id = 2
+        task_duration = 3600  
+        deadline = "2024-05-10"
+        start_time = "2024-04-10T12:40"
+        end_time = "2024-04-10T15:30"
+        format_data = '%Y-%m-%dT%H:%M'
 
-    try:
-        new_task = Tasks(
-            userid=user_id, 
-            task_id=task_id,
-            activity_id = activity_id,
-            task_name=task_name,
-            task_details=task_details,
-            task_duration=timedelta(seconds=task_duration),
-            deadline=datetime.strptime(deadline, '%Y-%m-%d').date(), 
-            start_time = datetime.strptime(start_time, format_data),
-            end_time = datetime.strptime(end_time, format_data)
-        )
-        db.session.add(new_task)
-        db.session.commit()
-        return "Task added successfully", 200
-    except Exception as e:
-        db.session.rollback()
-        return "An error occurred: {}".format(str(e)), 500
+        try:
+            new_task = Tasks(
+                userid=user_id, 
+                task_id=task_id,
+                activity_id = activity_id,
+                task_name=task_name,
+                task_details=task_details,
+                task_duration=timedelta(seconds=task_duration),
+                deadline=datetime.strptime(deadline, '%Y-%m-%d').date(), 
+                start_time = datetime.strptime(start_time, format_data),
+                end_time = datetime.strptime(end_time, format_data)
+            )
+            db.session.add(new_task)
+            db.session.commit()
+            return "Task added successfully\n", 200
+        except Exception as e:
+            db.session.rollback()
+            return "An error occurred: {}".format(str(e)), 500
+    return render_template('add_task.html')
 
 #Hardcoded data for now.
-@app.route('/add_activity', methods=['POST'])
+@app.route('/add_activity', methods=['GET', 'POST'])
 def add_activity():
-    user_id = 1  
-    activity_name = "Team Meeting"
-    time = "2024-05-10"  
-    activity_id = 2
+    if request.method == 'POST':
+        user_id = 1  
+        activity_name = "Team Meeting"
+        time = "2024-05-10"  
+        activity_id = 2
 
-    try:
-        new_activity = Activities(
-            userid=user_id,
-            activity_id = activity_id,
-            activity_name=activity_name,
-            time=datetime.strptime(time, '%Y-%m-%d').date()  
-        )
-        db.session.add(new_activity)
-        db.session.commit()
-        return "Activity added successfully", 200
-    except Exception as e:
-        db.session.rollback()
-        return "An error occurred: {0}".format(str(e)), 500
-
+        try:
+            new_activity = Activities(
+                userid=user_id,
+                activity_id = activity_id,
+                activity_name=activity_name,
+                time=datetime.strptime(time, '%Y-%m-%d').date()  
+            )
+            db.session.add(new_activity)
+            db.session.commit()
+            return "Activity added successfully\n", 200
+        except Exception as e:
+            db.session.rollback()
+            return "An error occurred: {0}".format(str(e)), 500
+    return render_template('add_activity.html')
 if __name__ == '__main__':
     app.run(debug=True)

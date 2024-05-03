@@ -21,8 +21,8 @@ body {
   
     --fc-button-text-color: #fff; 
     /* --fc-button-bg-color: #2C3E50; */
-    --fc-button-bg-color:  rgb(47, 0, 83);
-    --fc-button-border-color:  rgb(47, 0, 83);
+    --fc-button-bg-color:  rgba(64, 55, 67, 0.7); 
+    --fc-button-border-color:  rgba(64, 55, 67, 0.7); 
     --fc-button-hover-bg-color:  rgb(30, 0, 53);
     --fc-button-hover-border-color:  rgb(30, 0, 53);
     --fc-button-active-bg-color:  rgb(18, 0, 32);
@@ -82,3 +82,7 @@ body {
 /* .fc-day-past {
     background-color: blue
 } */
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; 
+} 
