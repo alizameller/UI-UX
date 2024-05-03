@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import pyotp
 from sqlalchemy.sql import text
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine, text, Integer, String, Column, DateTime, ForeignKey, PrimaryKeyConstraint, func, select
 from sqlalchemy.orm import sessionmaker, declarative_base, backref, relationship
 from datetime import datetime, timedelta
@@ -11,10 +13,12 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecretkey'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+
+
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
@@ -80,15 +84,48 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Handle login logic here
-        return redirect(url_for('dashboard'))
+        data = request.get_json()
+        print(data)
+        email = data.get('email')
+        masterkey = data.get('password')
+        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        db = engine.connect()
+        cursor = db.execute(text(f'SELECT password FROM users WHERE email = \'{email}\''))
+        password = cursor.fetchall()
+        if not password:
+            return jsonify({'message': 'User not found'}), 401
+        elif not check_password_hash(password[0][0], masterkey):
+            return jsonify({'message': 'Incorrect password'}), 401
+        else: 
+            session['username'] = email
+            print(session['username'])
+            db.close()
+            return jsonify({'message': 'User not found'}), 200
+        # return render_template('dashboard.html', tasks=tasks, colors=colors)
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        db = engine.connect()
+        cursor = db.execute(text(f'SELECT email FROM users WHERE email = \'{email}\''))
+        user = cursor.fetchall()
+
+        if user:
+            return jsonify({'message': 'Email already has an associated account'}), 400
+
+        db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
+        db.commit()
+        db.close()
+
+        #return jsonify({'message': 'Registration successful'})
         # Handle signup logic here
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('login'))
     return render_template('signup.html')
 
 @app.route('/dashboard')

@@ -19,12 +19,43 @@
         <div class="form">
             <h1>Login</h1>
             <!-- Login form here -->
-            <input type="email" placeholder="Email">
-            <input type="password" placeholder="Password">
+            <form id="loginForm">
+                
+                <input type="text" id="email" name="email", placeholder="email"><br>
+                <input type="password" id="password" name="password", placeholder="password"><br>
+                <button type="submit">Login</button>
+            </form>
             <!-- <a href="/dashboard" class="btn">Login</a> -->
-            <a href="/dashboard"><button>Login</button></a>
+            
             <div class="signup-link">Don't have an account? <a href="/signup">Sign up here</a></div>
         </div>
     </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({  email, password })
+            })
+            .then(response => {
+                if (response.status == 200){
+                    window.location.href = 'http://127.0.0.1:5000/dashboard'
+                }
+                else {
+                    alert("Error: " + response.status + "\nUnrecognized User")
+                    throw new Error(response.status)
+                }
+            })
+            .then(data => {
+                console.log(data)
+            });
+        });
+    </script>
 </body>
 </html>
