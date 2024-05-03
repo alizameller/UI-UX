@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS users;
 CREATE TABLE Users ( 
-    email VARCHAR(100),
+    email VARCHAR(256),
     Userid Serial,
-    Password VARCHAR(100),
+    Password VARCHAR(256),
     PRIMARY KEY (email)
     );
 
