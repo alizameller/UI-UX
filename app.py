@@ -132,7 +132,9 @@ def signup():
 def dashboard():
     new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
     # print(new_tasks)
-    return render_template('dashboard.html', tasks=new_tasks, colors=colors)
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).asc()).all()
+    print(new_activities)
+    return render_template('dashboard.html', tasks=new_tasks, colors=colors, activities=new_activities)
 
 @app.route('/monthly_calendar')
 def monthly_calendar():
@@ -214,7 +216,6 @@ def add_task():
             #return render_template('add_task.html')
     return render_template('add_task.html')
 
-#Hardcoded data for now.
 @app.route('/add_activity', methods=['GET', 'POST'])
 def add_activity():
     if request.method == 'POST':
@@ -249,7 +250,7 @@ def add_activity():
             )
             db.session.add(new_activity)
             db.session.commit()
-            flash('Task added successfully!')
+            flash('Activity added successfully!')
             # message = "Task added successfully!"
         except Exception as e:
             db.session.rollback()
@@ -260,5 +261,6 @@ def add_activity():
             # message = "An error occurred: {}".format(str(e))
             flash(message)
     return render_template('add_activity.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
