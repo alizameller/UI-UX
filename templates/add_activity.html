@@ -4,22 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='add_task.css') }}">
     <script src="https://kit.fontawesome.com/0e71ef810d.js" crossorigin="anonymous"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script>
-
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          fixedWeekCount: false
-        });
-        calendar.render();
-      });
-
-    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 </head>
 
 <body>
@@ -43,98 +31,36 @@
         <div class="parent">
             <div class="container">
                 <div class="header">
-                    <h1>Task Agenda</h1>
+                    <h1>Add Activity</h1>
                 </div>
-                <div class="task-list">
-                    {% for task in tasks %}
-                    <script>
-                        var div = document.createElement('div'), // Create a new div
-                        script = document.scripts[document.scripts.length - 1]; // A reference to the currently running script
-                        div.className = "date";
-                        var date = new Date("{{ task.start_time }}");
-                        div.innerHTML = new Intl.DateTimeFormat('en-US', {day: 'numeric', month: 'long'}).format(date) + ":";
-                        script.parentElement.insertBefore(div, script); // Add the newly-created div to the page
-                    </script>
-                    <div class="task">
-                        <!-- <h3>{{ task.name }}</h3>
-                        <p>Details of {{ task.name }}</p> -->
-                            <p>
-                                <p1 id="{{ task.task_id }} start">Hello</p1> 
-                                <script>
-                                    var element = document.getElementById("{{ task.task_id }} start");
-                                    var date = new Date("{{ task.start_time }}");
-                                    // element.innerHTML = date.getHours() + ":" + date.getMinutes();
-                                    element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: '2-digit', minute: 'numeric',}).format(date);
-                                </script>
-                                <span class="vl" id="{{task.activity_name}}"></span>
-                                <span class="task-item" style="color: rgb(15,0,85); font-size: 1.3rem;">{{ task.activity_name }}</span>
-                            </p>
-                            <p>
-                                <p2 id="{{ task.task_id }} end">Hello</p2> 
-                                <script>
-                                    var element = document.getElementById("{{ task.task_id }} end");
-                                    var date = new Date("{{ task.end_time }}");
-                                    //element.innerHTML = date.getHours() + ":" + date.getMinutes();
-                                    element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: 'numeric',}).format(date);
-                                </script>
-                                <span class="priority" style="font-size: 1rem;">{{ task.task_name }}</span>
-                            </p>
-                    </div>
-                    {% endfor %}
-                    <!-- var name = line.id;
-                    var selector = "[id=" + name + ']';
-                    id_elements = document.querySelectorAll(selector);
-                    if (name == "Databases"){
-                        for (id in id_elements) {
-                            id.style.borderLeftColor = "red";
-                        }
-                    } -->
-                </div>
+                <form id="myForm" action="{{ url_for('add_activity') }}" method="post">
+                    <label for="activity_name">Activity Name</label>
+                    <input type="text" id="activity_name" name="activity_name" placeholder="Activity Name" required="">
+                  
+                    <label for="details">Activity Details</label>
+                    <input type="text" id="details" name="details" placeholder="Details of Activity">
+                    
+                    <label for="start_time">Start Time</label>
+                    <input type="datetime-local" id="start_time" name="start_time">
+
+                    <label for="end_time">End Time</label>
+                    <input type="datetime-local" id="end_time" name="end_time">
+                  
+                    <input type="submit" value="Submit">
+                </form>
             </div>
-            <div class="sub-parent">
-                <div class="mini-calendar">
-                    <div id='calendar'></div>
-                </div>
-                <div class="container2">
-                    <div class="header">
-                        <h1>Class Agenda</h1>
-                    </div>
-                    <div class="activity-list">
-                        {% for task in tasks %}
-                        <div class="activity">
-                            <!-- <h3>{{ task.name }}</h3>
-                            <p>Details of {{ task.name }}</p> -->
-                                <p>
-                                    <p1 id="{{ task.task_id }} start">12:00 PM</p1> 
-                                    <script>
-                                        var element = document.getElementById("{{ task.task_id }} start");
-                                        var date = new Date("{{ task.start_time }}");
-                                        // element.innerHTML = date.getHours() + ":" + date.getMinutes();
-                                        element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: '2-digit', minute: 'numeric',}).format(date);
-                                    </script>
-                                    <span class="activity-item" style="color: rgb(15,0,85); font-size: 1.2rem;">{{ task.activity_name }}</span>
-                                    <p2>-</p2> 
-                                    <p2 id="{{ task.task_id }} end">12:00 PM</p2> 
-                                    <script>
-                                        var element = document.getElementById("{{ task.task_id }} end");
-                                        var date = new Date("{{ task.end_time }}");
-                                        //element.innerHTML = date.getHours() + ":" + date.getMinutes();
-                                        element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: 'numeric',}).format(date);
-                                    </script>
-                                </p>
-                        </div>
-                        {% endfor %}
-                        <!-- var name = line.id;
-                        var selector = "[id=" + name + ']';
-                        id_elements = document.querySelectorAll(selector);
-                        if (name == "Databases"){
-                            for (id in id_elements) {
-                                id.style.borderLeftColor = "red";
-                            }
-                        } -->
-                    </div>
-                </div>
-            </div>
+        </div>
+        <div class="message">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <script>
+                    var messages = {{ messages | safe }};
+                    for (var i=0; i < messages.length; i++) {
+                        alert(messages[i]);
+                    }
+                </script>
+                {% endif %}
+          {% endwith %}
         </div>
     </div>
     <script>
@@ -157,7 +83,7 @@
             lines = document.getElementsByClassName("vl");
             for (let i = 0; i < lines.length; i++) {
                 let name = lines[i].id;
-                // console.log(name); // Output: "Hello John!
+                console.log(name); 
                 // console.log(colors);
                 const colors = '{{colors}}'.replace(/&#39;(.+?)&#39;/g, '"$1"'); 
                 // console.log(newColors);
