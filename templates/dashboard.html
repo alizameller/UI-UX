@@ -51,18 +51,17 @@
                         var div = document.createElement('div'), // Create a new div
                         script = document.scripts[document.scripts.length - 1]; // A reference to the currently running script
                         div.className = "date";
-                        var date = new Date("{{ task.start_time }}");
+                        var date = new Date("{{ task.end_time }}");
                         div.innerHTML = new Intl.DateTimeFormat('en-US', {day: 'numeric', month: 'long'}).format(date) + ":";
                         script.parentElement.insertBefore(div, script); // Add the newly-created div to the page
                     </script>
                     <div class="task">
-                        <!-- <h3>{{ task.name }}</h3>
-                        <p>Details of {{ task.name }}</p> -->
+                        <!-- <p>Details of {{ task.name }}</p> -->
                             <p>
-                                <p1 id="{{ task.task_id }} start">12:00 AM</p1> 
+                                <p1 id="{{ task.task_id }} end">12:00 AM</p1> 
                                 <script>
-                                    var element = document.getElementById("{{ task.task_id }} start");
-                                    var date = new Date("{{ task.start_time }}");
+                                    var element = document.getElementById("{{ task.task_id }} end");
+                                    var date = new Date("{{ task.end_time }}");
                                     // element.innerHTML = date.getHours() + ":" + date.getMinutes();
                                     element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: '2-digit', minute: 'numeric',}).format(date);
                                 </script>
@@ -71,12 +70,14 @@
                                 <input type="checkbox" style="position: relative;"/>
                             </p>
                             <p>
-                                <p2 id="{{ task.task_id }} end">12:00 AM</p2> 
+                                <p2 id="{{ task.task_id }} duration">12:00 AM</p2> 
                                 <script>
-                                    var element = document.getElementById("{{ task.task_id }} end");
-                                    var date = new Date("{{ task.end_time }}");
+                                    var element = document.getElementById("{{ task.task_id }} duration");
+                                    console.log({{ task.duration }});
+                                    element.innerHTML = "{{ task.task_duration }}";
+                                    //var date = new Date("{{ task.task_duration }}");
                                     //element.innerHTML = date.getHours() + ":" + date.getMinutes();
-                                    element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: 'numeric',}).format(date);
+                                    //element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: 'numeric',});
                                 </script>
                                 <span class="priority" style="font-size: 1rem;">{{ task.task_name }}</span>
                             </p>
@@ -101,24 +102,22 @@
                         <h1>Class Agenda</h1>
                     </div>
                     <div class="activity-list">
-                        {% for task in tasks %}
+                        {% for activity in activities %}
                         <div class="activity">
-                            <!-- <h3>{{ task.name }}</h3>
-                            <p>Details of {{ task.name }}</p> -->
                                 <p>
-                                    <p1 id="{{ task.task_id }} start">12:00 PM</p1> 
+                                    <p1 id="{{ activity.activity_id }} start">12:00 PM</p1> 
                                     <script>
-                                        var element = document.getElementById("{{ task.task_id }} start");
-                                        var date = new Date("{{ task.start_time }}");
+                                        var element = document.getElementById("{{ activity.activity_id }} start");
+                                        var date = new Date("{{ activity.start_time }}");
                                         // element.innerHTML = date.getHours() + ":" + date.getMinutes();
                                         element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: '2-digit', minute: 'numeric',}).format(date);
                                     </script>
-                                    <span class="activity-item" style="color: rgb(15,0,85); font-size: 1.2rem;">{{ task.activity_name }}</span>
+                                    <span class="activity-item" style="color: rgb(15,0,85); font-size: 1.2rem;">{{ activity.activity_name }}</span>
                                     <p2>-</p2> 
-                                    <p2 id="{{ task.task_id }} end">12:00 PM</p2> 
+                                    <p2 id="{{ activity.activity_id }} end">12:00 PM</p2> 
                                     <script>
-                                        var element = document.getElementById("{{ task.task_id }} end");
-                                        var date = new Date("{{ task.end_time }}");
+                                        var element = document.getElementById("{{ activity.activity_id }} end");
+                                        var date = new Date("{{ activity.end_time }}");
                                         //element.innerHTML = date.getHours() + ":" + date.getMinutes();
                                         element.innerHTML = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: 'numeric',}).format(date);
                                     </script>

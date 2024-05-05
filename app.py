@@ -12,11 +12,11 @@ from datetime import datetime, timedelta
 db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mysecretkey'
+app.config['SECRET_KEY'] = 'alizameller'
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_HTTPONLY'] = True
+# app.config['SESSION_COOKIE_SECURE'] = True
+# app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
@@ -67,9 +67,11 @@ class Activities(Base):
     __tablename__ = 'activities'
 
     activity_id = Column(Integer, primary_key = True)
-    activity_name = Column(String)
     userid = Column(Integer)
-    time = Column(DateTime)    
+    activity_name = Column(String)
+    activity_details = Column(String)
+    start_time = Column(DateTime)    
+    end_time = Column(DateTime)
 
     def __repr__(self):
         return "Activity {self.activity_id}" 
@@ -98,7 +100,7 @@ def login():
             session['username'] = email
             print(session['username'])
             db.close()
-            return jsonify({'message': 'User not found'}), 200
+            return jsonify({'message': 'User found'}), 200
         # return render_template('dashboard.html', tasks=tasks, colors=colors)
     return render_template('login.html')
 
@@ -128,9 +130,11 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.start_time).desc()).all()
-    print(new_tasks)
-    return render_template('dashboard.html', tasks=new_tasks, colors=colors)
+    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
+    # print(new_tasks)
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).asc()).all()
+    print(new_activities)
+    return render_template('dashboard.html', tasks=new_tasks, colors=colors, activities=new_activities)
 
 @app.route('/monthly_calendar')
 def monthly_calendar():
@@ -156,7 +160,6 @@ def test_db():
 def events():
     return render_template('loading.html')
 
-#Hardcoded data for now.
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
     if request.method == 'POST':
@@ -167,7 +170,7 @@ def add_task():
         # print((request.form['duration_mins']))
         print((request.form['deadline']))
         
-        user_id = 1
+        # user_id = 1
         # task_id = 3
         task_name = request.form['task_name']
         task_details = request.form['details']
@@ -181,6 +184,10 @@ def add_task():
         if id[0][0]:
             activity_id = id[0][0]
             print(activity_id)
+        uid = db.session.query(Users.userid).where(Users.email == session['username']).all()
+        if uid[0][0]:
+            user_id = uid[0][0]
+            print(user_id)
 
         try:
             new_task = Tasks(
@@ -209,28 +216,51 @@ def add_task():
             #return render_template('add_task.html')
     return render_template('add_task.html')
 
-#Hardcoded data for now.
 @app.route('/add_activity', methods=['GET', 'POST'])
 def add_activity():
     if request.method == 'POST':
-        user_id = 1  
-        activity_name = "Team Meeting"
-        time = "2024-05-10"  
-        activity_id = 2
+        # user_id = 1  
+        # activity_name = "Team Meeting"
+        # activity_details = NULL
+        # start_time = "2024-05-10"  
+        # end_time = "2024-05-10"  
+        # activity_id = 2
+        format_data = '%Y-%m-%dT%H:%M'
+        print((request.form['activity_name']))
+        print((request.form['details']))
+        print((request.form['start_time']))
+        print((request.form['end_time']))
+        activity_name = request.form['activity_name']
+        activity_details = request.form['details']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+
+        uid = db.session.query(Users.userid).where(Users.email == session['username']).all()
+        if uid[0][0]:
+            user_id = uid[0][0]
+            print(user_id)
 
         try:
             new_activity = Activities(
-                userid=user_id,
-                activity_id = activity_id,
+                userid=user_id, 
                 activity_name=activity_name,
-                time=datetime.strptime(time, '%Y-%m-%d').date()  
+                activity_details=activity_details,
+                start_time = datetime.strptime(start_time, format_data),
+                end_time = datetime.strptime(end_time, format_data)
             )
             db.session.add(new_activity)
             db.session.commit()
-            return "Activity added successfully\n", 200
+            flash('Activity added successfully!')
+            # message = "Task added successfully!"
         except Exception as e:
             db.session.rollback()
-            return "An error occurred: {0}".format(str(e)), 500
+            if (type(e).__name__) == "IntegrityError":
+                message = "An internal error occured. \nPlease try again."
+            if (type(e).__name__) == "ValueError":
+                message = "An invalid datetime value was entered. \nPlease select a date from the dropdown calendar."
+            # message = "An error occurred: {}".format(str(e))
+            flash(message)
     return render_template('add_activity.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
