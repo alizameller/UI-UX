@@ -71,7 +71,7 @@
                                 <script>
                                     $("#check{{ task.task_id }}").change(function(){
                                         if ($(this).is(':checked'))
-                                          showPopup();
+                                          showPopup({{ task.task_id }});
                                     });
                                 </script>
                             </p>
@@ -156,7 +156,7 @@
             }
         }   
 
-        function showPopup() {
+        function showPopup(task_id) {
             Swal.fire({
                 text: "Do you want to delete this task?",
                 showDenyButton: true,
@@ -167,6 +167,26 @@
                 /* Read more about isConfirmed, isDenied below */
                 if (result.isConfirmed) {
                   Swal.fire("Saved!", "", "success");
+                  event.preventDefault();
+
+                  fetch('/delete_task', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ task_id })
+                  }).then(response => {
+                      if (response.status == 200){
+                          window.location.href = 'http://127.0.0.1:5000/dashboard'
+                      }
+                      else {
+                          alert("Error: " + response.status + "\nUnrecognized User")
+                          throw new Error(response.status)
+                      }
+                  })
+                  .then(data => {
+                      console.log(data)
+                  });
                 } else if (result.isDenied) {
                   Swal.fire("No changes!", "", "info");
                 }

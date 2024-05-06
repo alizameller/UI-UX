@@ -99,7 +99,6 @@ def login():
         else: 
             session['username'] = email
             print(session['username'])
-            db.close()
             return jsonify({'message': 'User found'}), 200
         # return render_template('dashboard.html', tasks=tasks, colors=colors)
     return render_template('login.html')
@@ -121,8 +120,6 @@ def signup():
 
         db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
         db.commit()
-        db.close()
-
         #return jsonify({'message': 'Registration successful'})
         # Handle signup logic here
         return redirect(url_for('login'))
@@ -220,6 +217,19 @@ def add_task():
             flash(message)
             #return render_template('add_task.html')
     return render_template('add_task.html', activities = activities)
+
+@app.route('/delete_task', methods=['POST'])
+def delete_task():
+    if request.method == 'POST':
+        data = request.get_json()
+        task_id = data.get('task_id')
+        uid = db.session.query(Users.userid).where(Users.email == session['username']).one()
+        print(uid[0], task_id)
+        db.session.query(Tasks).filter(Tasks.userid == uid[0], Tasks.task_id == task_id).delete()
+        #db.execute(text(f'DELETE FROM tasks WHERE task_id = 3 AND userid = 1'))
+        db.session.commit()
+
+        return jsonify({'message': 'Endpoint hit'}), 200
 
 @app.route('/add_activity', methods=['GET', 'POST'])
 def add_activity():
