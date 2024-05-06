@@ -14,7 +14,7 @@ body {
     margin-right: 50px;
     margin-bottom: 50px;
     --fc-small-font-size: .85em;
-    --fc-page-bg-color: rgba(56, 56, 56, 0.7);
+    --fc-page-bg-color: rgba(56, 56, 56, 0.9);
     --fc-neutral-bg-color: rgba(208, 208, 208, 0);
     --fc-neutral-text-color: rgba(208, 208, 208, 0);
     --fc-border-color: #ddd;

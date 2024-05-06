@@ -35,16 +35,16 @@ document.addEventListener('DOMContentLoaded', function () {
         // events: 'https://fullcalendar.io/api/demo-feeds/events.json',
         events: events,
         initialView: 'dayGridMonth',
-        selectable: true,
-        select: function(info) {
-            let task = prompt("Add Task", "Task Name");
-            let text;
-            if (person == null || person == "") {
-            text = "User cancelled the prompt.";
-            } else {
-            text = "Hello " + person + "! How are you today?";
-            }
-        }
+        // selectable: true,
+        // select: function(info) {
+        //     let task = prompt("Add Task", "Task Name");
+        //     let text;
+        //     if (person == null || person == "") {
+        //     text = "User cancelled the prompt.";
+        //     } else {
+        //     text = "Hello " + person + "! How are you today?";
+        //     }
+        // }
     });
 
     calendar.render();
