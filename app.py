@@ -22,12 +22,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db.init_app(app)
 
 # Placeholder data for demonstration
-tasks = [
-    {"id": 1, "activity": "UI/UX", "name": "Homework", "details": "Details of Task 1", "start_time": "2024-04-08T15:40", "end_time": "2024-04-08T17:00", "priority": "High"},
-    {"id": 2, "activity": "Databases", "name": "Presentation", "details": "Details of Task 2", "start_time": "2024-04-09T12:40", "end_time": "2024-04-09T15:00", "priority": "Medium"},
-    {"id": 3, "activity": "Senior Projects", "name": "Meeting", "details": "Details of Task 2", "start_time": "2024-04-09T12:40", "end_time": "2024-04-09T15:00", "priority": "Medium"},
-    {"id": 4, "activity": "Databases", "name": "Assignment", "details": "Details of Task 2", "start_time": "2024-04-10T12:40", "end_time": "2024-04-10T15:00", "priority": "Medium"},
-]
+# tasks = [
+#     {"id": 1, "activity": "UI/UX", "name": "Homework", "details": "Details of Task 1", "start_time": "2024-04-08T15:40", "end_time": "2024-04-08T17:00", "priority": "High"},
+#     {"id": 2, "activity": "Databases", "name": "Presentation", "details": "Details of Task 2", "start_time": "2024-04-09T12:40", "end_time": "2024-04-09T15:00", "priority": "Medium"},
+#     {"id": 3, "activity": "Senior Projects", "name": "Meeting", "details": "Details of Task 2", "start_time": "2024-04-09T12:40", "end_time": "2024-04-09T15:00", "priority": "Medium"},
+#     {"id": 4, "activity": "Databases", "name": "Assignment", "details": "Details of Task 2", "start_time": "2024-04-10T12:40", "end_time": "2024-04-10T15:00", "priority": "Medium"},
+# ]
 
 # INSERT INTO tasks (task_id, userid, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (1, 1, 'Homework', 'Details of Task 1', NULL, NULL, '2024-04-08T15:40', '2024-04-08T17:00')
 # INSERT INTO tasks (task_id, userid, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (1, 1, 'Homework', 'Details of Task 1', NULL, NULL, '2024-04-08T15:40', '2024-04-08T17:00')  
@@ -141,7 +141,9 @@ def dashboard():
 @app.route('/monthly_calendar')
 def monthly_calendar():
     # Render your monthly_calendar.html template
-    return render_template('monthly_calendar.html', tasks=tasks, colors=colors)
+    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).desc()).all()
+    return render_template('monthly_calendar.html', activities=new_activities, tasks = new_tasks, colors=colors)
 
 @app.route('/loading')
 def loading():

@@ -4,28 +4,50 @@
     <meta charset='utf-8' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script type="text/javascript" src="{{ url_for('static', filename='scripts.js') }}"></script>
-    <script type="text/javascript">
-        const colors = '{{colors}}'.replace(/&#39;(.+?)&#39;/g, '"$1"'); 
-        const tasks = JSON.parse('{{tasks}}'.replace(/&#39;(.+?)&#39;/g, '"$1"')); 
-        console.log(tasks.length);
+    <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
+    <script>
         var events = [];
-        for (var i = 0; i < tasks.length; i++) {
-            let name = tasks[i].activity;
-            events.push({
-                title: name,
-                start: tasks[i].start_time, 
-                end: tasks[i].end_time, 
-                color: JSON.parse(colors)[name],
-            });
-        }
-        
+        const colors = '{{colors}}'.replace(/&#39;(.+?)&#39;/g, '"$1"'); 
+        let activity_name = '';
+    </script>
+</head>
+  <body>
+    {% for task in tasks %}
+    <script>
+        console.log('{{ task.task_id }}');
+        console.log('{{ task.activity_name }}');
+        console.log('{{ task.task_duration }}');
+        console.log('{{ task.end_time }}');
+        console.log('{{ task.task_name }}');
+        activity_name = '{{ task.activity_name }}';
+        events.push({
+            title: '{{ task.task_name }}',
+            start: '{{ task.end_time }}', 
+            end: '{{ task.end_time }}', 
+            color: JSON.parse(colors)[activity_name],
+        });
+        console.log(events)
+        console.log(colors)
+    </script>
+    {% endfor %}
+    {% for activity in activities %}
+    <script>
+        activity_name = '{{ activity.activity_name }}';
+        events.push({
+            title: activity_name,
+            start: '{{ activity.start_time }}', 
+            end: '{{ activity.end_time }}', 
+            color: JSON.parse(colors)[activity_name],
+            display: 'block'
+        });
+        console.log(events)
+        console.log(colors)
+    </script>
+    {% endfor %}
+    <script type="text/javascript">
         window.resizeTo(window.width - 1, window.height - 1);
         window.resizeTo(window.width + 1, window.height + 1);
     </script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
-</head>
-  <body>
-
     <div id='calendar'></div>
   </body>
 </html>
