@@ -35,17 +35,26 @@
                 </div>
                 <form id="myForm" action="{{ url_for('add_task') }}" method="post">
                     <label for="task_name">Task Name</label>
-                    <input type="text" id="task_name" name="task_name" placeholder="Task Name.." required="">
+                    <input type="text" id="task_name" name="task_name" placeholder="Task Name" required="">
                   
                     <label for="details">Task Details</label>
-                    <input type="text" id="details" name="details" placeholder="Details of task">
+                    <input type="text" id="details" name="details" placeholder="Details of Task">
                   
                     <label for="activity">Activity</label>
                     <select id="activity" name="activity">
-                        <option value="Databases">Databases</option>
+                        {% for activity in activities %}
+                        <script>
+                            var option = document.createElement('option');
+                            option.text = '{{ activity.activity_name }}';
+                            option.value = '{{ activity.activity_name }}';
+                            script = document.scripts[document.scripts.length - 1];
+                            script.parentElement.insertBefore(option, script); 
+                        </script>
+                        {% endfor %}
+                        <!-- <option value="Databases">Databases</option>
                         <option value="Senior Projects">Senior Projects</option>
                         <option value="UI/UX">UI/UX</option>
-                        <option value="New">New Activity</option>
+                        <option value="New">New Activity</option> -->
                     </select>
                     
                     <label for="duration">Duration</label>

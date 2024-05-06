@@ -132,7 +132,9 @@ def signup():
 def dashboard():
     new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
     # print(new_tasks)
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).asc()).all()
+    todays_datetime = (datetime.today()).date(),
+    print(todays_datetime)
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
     print(new_activities)
     return render_template('dashboard.html', tasks=new_tasks, colors=colors, activities=new_activities)
 
@@ -162,6 +164,7 @@ def events():
 
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
+    activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).asc()).all()
     if request.method == 'POST':
         print((request.form['task_name']))
         print((request.form['details']))
@@ -214,7 +217,7 @@ def add_task():
             # message = "An error occurred: {}".format(str(e))
             flash(message)
             #return render_template('add_task.html')
-    return render_template('add_task.html')
+    return render_template('add_task.html', activities = activities)
 
 @app.route('/add_activity', methods=['GET', 'POST'])
 def add_activity():
