@@ -32,7 +32,7 @@ db.init_app(app)
 # INSERT INTO tasks (task_id, userid, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (1, 1, 'Homework', 'Details of Task 1', NULL, NULL, '2024-04-08T15:40', '2024-04-08T17:00')
 # INSERT INTO tasks (task_id, userid, task_name, task_details, task_duration, deadline, start_time, end_time) VALUES (1, 1, 'Homework', 'Details of Task 1', NULL, NULL, '2024-04-08T15:40', '2024-04-08T17:00')  
 
-colors = {"Databases": "rgb(226, 0, 246)", "UI/UX": "rgb(73, 246, 250)", "Senior Projects": "gray"}
+# colors = {"Databases": "rgb(226, 0, 246)", "UI/UX": "rgb(73, 246, 250)", "Senior Projects": "gray"}
 
 Base = declarative_base()
 class Users(Base):
@@ -72,6 +72,7 @@ class Activities(Base):
     activity_details = Column(String)
     start_time = Column(DateTime)    
     end_time = Column(DateTime)
+    color = Column(String)
 
     def __repr__(self):
         return "Activity {self.activity_id}" 
@@ -100,7 +101,6 @@ def login():
             session['username'] = email
             print(session['username'])
             return jsonify({'message': 'User found'}), 200
-        # return render_template('dashboard.html', tasks=tasks, colors=colors)
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -127,20 +127,20 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
+    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
     # print(new_tasks)
     todays_datetime = (datetime.today()).date(),
     print(todays_datetime)
     new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
     print(new_activities)
-    return render_template('dashboard.html', tasks=new_tasks, colors=colors, activities=new_activities)
+    return render_template('dashboard.html', tasks=new_tasks, activities=new_activities)
 
 @app.route('/monthly_calendar')
 def monthly_calendar():
     # Render your monthly_calendar.html template
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).desc()).all()
-    return render_template('monthly_calendar.html', activities=new_activities, tasks = new_tasks, colors=colors)
+    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time, Activities.color).order_by(func.age(Activities.start_time).desc()).all()
+    return render_template('monthly_calendar.html', activities=new_activities, tasks = new_tasks)
 
 @app.route('/loading')
 def loading():
@@ -168,15 +168,11 @@ def add_task():
         print((request.form['task_name']))
         print((request.form['details']))
         print((request.form['activity']))
-        # print((request.form['duration_hrs']))
-        # print((request.form['duration_mins']))
         print((request.form['deadline']))
-        
-        # user_id = 1
-        # task_id = 3
+        print(request.form['duration_hrs'])
+        print(request.form['duration_mins'])
         task_name = request.form['task_name']
         task_details = request.form['details']
-        # activity_id = 2
         task_duration = int(request.form['duration_hrs']) * 3600 + int((request.form['duration_mins'])) * 60
         print(task_duration)
         deadline = request.form['deadline']
@@ -204,9 +200,11 @@ def add_task():
             )
             db.session.add(new_task)
             db.session.commit()
-            flash('Task added successfully!')
+            # flash('Task added successfully!')
+            return jsonify({'message': 'Task added successfully!'}), 200
             # message = "Task added successfully!"
             #return render_template('add_task.html')
+
         except Exception as e:
             db.session.rollback()
             if (type(e).__name__) == "IntegrityError":
@@ -214,8 +212,9 @@ def add_task():
             if (type(e).__name__) == "ValueError":
                 message = "An invalid datetime value was entered. \nPlease select a date from the dropdown calendar."
             # message = "An error occurred: {}".format(str(e))
-            flash(message)
+            # flash(message)
             #return render_template('add_task.html')
+            return jsonify({'message': message}), 400
     return render_template('add_task.html', activities = activities)
 
 @app.route('/delete_task', methods=['POST'])
@@ -234,12 +233,6 @@ def delete_task():
 @app.route('/add_activity', methods=['GET', 'POST'])
 def add_activity():
     if request.method == 'POST':
-        # user_id = 1  
-        # activity_name = "Team Meeting"
-        # activity_details = NULL
-        # start_time = "2024-05-10"  
-        # end_time = "2024-05-10"  
-        # activity_id = 2
         format_data = '%Y-%m-%dT%H:%M'
         print((request.form['activity_name']))
         print((request.form['details']))
@@ -249,10 +242,11 @@ def add_activity():
         activity_details = request.form['details']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
-
-        uid = db.session.query(Users.userid).where(Users.email == session['username']).all()
-        if uid[0][0]:
-            user_id = uid[0][0]
+        color = request.form['color']
+        print(color)
+        uid = db.session.query(Users.userid).where(Users.email == session['username']).one()
+        if uid[0]:
+            user_id = uid[0]
             print(user_id)
 
         try:
@@ -261,20 +255,25 @@ def add_activity():
                 activity_name=activity_name,
                 activity_details=activity_details,
                 start_time = datetime.strptime(start_time, format_data),
-                end_time = datetime.strptime(end_time, format_data)
+                end_time = datetime.strptime(end_time, format_data),
+                color = str(color)
             )
             db.session.add(new_activity)
             db.session.commit()
-            flash('Activity added successfully!')
+            # flash('Activity added successfully!')
             # message = "Task added successfully!"
+            return jsonify({'message': 'Task added successfully!'}), 200
         except Exception as e:
             db.session.rollback()
             if (type(e).__name__) == "IntegrityError":
                 message = "An internal error occured. \nPlease try again."
             if (type(e).__name__) == "ValueError":
                 message = "An invalid datetime value was entered. \nPlease select a date from the dropdown calendar."
-            # message = "An error occurred: {}".format(str(e))
-            flash(message)
+                # message = "An error occurred: {}".format(str(e))
+            else:
+                message = "Error"
+            #flash(message)
+            return jsonify({'message': message}), 400
     return render_template('add_activity.html')
 
 if __name__ == '__main__':

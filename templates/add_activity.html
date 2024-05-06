@@ -8,6 +8,8 @@
     <script src="https://kit.fontawesome.com/0e71ef810d.js" crossorigin="anonymous"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -28,18 +30,21 @@
                 <div class="header">
                     <h1>Add Activity</h1>
                 </div>
-                <form id="myForm" action="{{ url_for('add_activity') }}" method="post">
+                <form id="myForm" action="javascript:;" onsubmit=" showPopup() ">
                     <label for="activity_name">Activity Name</label>
                     <input type="text" id="activity_name" name="activity_name" placeholder="Activity Name" required="">
                   
                     <label for="details">Activity Details</label>
                     <input type="text" id="details" name="details" placeholder="Details of Activity">
-                    
+
                     <label for="start_time">Start Time</label>
                     <input type="datetime-local" id="start_time" name="start_time">
 
                     <label for="end_time">End Time</label>
                     <input type="datetime-local" id="end_time" name="end_time">
+
+                    <label for="start_time">Color</label>
+                    <input type="color" id="color" name="color" value="rgb(15,0,85)">
                   
                     <input type="submit" value="Submit">
                 </form>
@@ -59,35 +64,24 @@
         </div>
     </div>
     <script>
-        setColor();
-        /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
-        function openNav() {
-            document.getElementById("menuBars").style.visibility = 'hidden';
-            document.getElementById("mySidenav").style.width = "250px";
-            document.getElementById("main").style.marginLeft = "250px";
+        function showPopup() {
+            const form = document.querySelector("#myForm");
+            const formData = new FormData(form);
+            fetch('/add_activity', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.status == 200){
+                    Swal.fire("Success", "", "success"); 
+                }
+                else {
+                    Swal.fire("Something went wrong", "", "error");
+                }
+            })
+            .then(data => {
+                console.log(data)
+            });
         }
-
-        /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
-        function closeNav() {
-            document.getElementById("menuBars").style.visibility = 'visible';
-            document.getElementById("mySidenav").style.width = "0";
-            document.getElementById("main").style.marginLeft = "0";
-        }
-
-        function setColor() {
-            lines = document.getElementsByClassName("vl");
-            for (let i = 0; i < lines.length; i++) {
-                let name = lines[i].id;
-                console.log(name); 
-                // console.log(colors);
-                const colors = '{{colors}}'.replace(/&#39;(.+?)&#39;/g, '"$1"'); 
-                // console.log(newColors);
-                // console.log(JSON.parse(newColors));
-                let color = JSON.parse(colors)[name];
-                //console.log(color);
-                lines[i].style.borderLeftColor = color;
-            }
-        }   
     </script>
 </body>
 </html>
