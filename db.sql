@@ -14,6 +14,7 @@ CREATE TABLE Activities(
     activity_details VARCHAR(500),
     start_time TIMESTAMP,
     end_time TIMESTAMP,
+    color VARCHAR(100),
     PRIMARY KEY(activity_id, activity_name, Userid)
     );
 

@@ -8,6 +8,8 @@
     <script src="https://kit.fontawesome.com/0e71ef810d.js" crossorigin="anonymous"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -33,7 +35,8 @@
                 <div class="header">
                     <h1>Add Task</h1>
                 </div>
-                <form id="myForm" action="{{ url_for('add_task') }}" method="post">
+                <!-- <form id="myForm" action="{{ url_for('add_task') }}" method="post"> -->
+                    <form id="myForm" action="javascript:;" onsubmit=" showPopup() "> 
                     <label for="task_name">Task Name</label>
                     <input type="text" id="task_name" name="task_name" placeholder="Task Name" required="">
                   
@@ -51,6 +54,7 @@
                             script.parentElement.insertBefore(option, script); 
                         </script>
                         {% endfor %}
+                        <option value="">None</option>
                         <!-- <option value="Databases">Databases</option>
                         <option value="Senior Projects">Senior Projects</option>
                         <option value="UI/UX">UI/UX</option>
@@ -58,11 +62,11 @@
                     </select>
                     
                     <label for="duration">Duration</label>
-                    <input type="number" id="duration" name="duration_hrs" placeholder="hours">
-                    <input type="number" id="duration" name="duration_mins" placeholder="mins">
+                    <input type="number" id="duration" name="duration_hrs" placeholder="hours" required="">
+                    <input type="number" id="duration" name="duration_mins" placeholder="mins" required="">
                     
                     <label for="deadline">Deadline</label>
-                    <input type="datetime-local" id="deadline" name="deadline">
+                    <input type="datetime-local" id="deadline" name="deadline" required="">
                   
                     <input type="submit" value="Submit">
                 </form>
@@ -82,35 +86,24 @@
         </div>
     </div>
     <script>
-        setColor();
-        /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
-        function openNav() {
-            document.getElementById("menuBars").style.visibility = 'hidden';
-            document.getElementById("mySidenav").style.width = "250px";
-            document.getElementById("main").style.marginLeft = "250px";
+        function showPopup() {
+            const form = document.querySelector("#myForm");
+            const formData = new FormData(form);
+            fetch('/add_task', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.status == 200){
+                    Swal.fire("Success", "", "success"); 
+                }
+                else {
+                    Swal.fire("Something went wrong", "", "error");
+                }
+            })
+            .then(data => {
+                console.log(data)
+            });
         }
-
-        /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
-        function closeNav() {
-            document.getElementById("menuBars").style.visibility = 'visible';
-            document.getElementById("mySidenav").style.width = "0";
-            document.getElementById("main").style.marginLeft = "0";
-        }
-
-        function setColor() {
-            lines = document.getElementsByClassName("vl");
-            for (let i = 0; i < lines.length; i++) {
-                let name = lines[i].id;
-                console.log(name); 
-                // console.log(colors);
-                const colors = '{{colors}}'.replace(/&#39;(.+?)&#39;/g, '"$1"'); 
-                // console.log(newColors);
-                // console.log(JSON.parse(newColors));
-                let color = JSON.parse(colors)[name];
-                //console.log(color);
-                lines[i].style.borderLeftColor = color;
-            }
-        }   
     </script>
 </body>
 </html>

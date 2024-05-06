@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
     <script>
         var events = [];
-        const colors = '{{colors}}'.replace(/&#39;(.+?)&#39;/g, '"$1"'); 
         let activity_name = '';
     </script>
 </head>
@@ -24,10 +23,9 @@
             title: '{{ task.task_name }}',
             start: '{{ task.end_time }}', 
             end: '{{ task.end_time }}', 
-            color: JSON.parse(colors)[activity_name],
+            color: '{{ task.color }}',
         });
         console.log(events)
-        console.log(colors)
     </script>
     {% endfor %}
     {% for activity in activities %}
@@ -37,11 +35,10 @@
             title: activity_name,
             start: '{{ activity.start_time }}', 
             end: '{{ activity.end_time }}', 
-            color: JSON.parse(colors)[activity_name],
+            color:'{{ activity.color }}',
             display: 'block'
         });
         console.log(events)
-        console.log(colors)
     </script>
     {% endfor %}
     <script type="text/javascript">
