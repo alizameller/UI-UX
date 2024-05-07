@@ -13,7 +13,7 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:password@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -39,7 +39,7 @@ class Users(Base):
     __tablename__ = 'users'
 
     email = Column(String, primary_key = True)
-    userid = Column(Integer, autoincrement=True)
+    userid = Column(Integer, autoincrement=True, primary_key=True)
     password = Column(String)
 
     def __repr__(self):
@@ -86,13 +86,9 @@ def index():
 def login():
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
         email = data.get('email')
         masterkey = data.get('password')
-        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-        db = engine.connect()
-        cursor = db.execute(text(f'SELECT password FROM users WHERE email = \'{email}\''))
-        password = cursor.fetchall()
+        password = db.session.query(Users.password).where(Users.email == email).all()
         if not password:
             return jsonify({'message': 'User not found'}), 401
         elif not check_password_hash(password[0][0], masterkey):
@@ -106,23 +102,20 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
-        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-        db = engine.connect()
-        cursor = db.execute(text(f'SELECT email FROM users WHERE email = \'{email}\''))
-        user = cursor.fetchall()
-
+        user = db.session.query(Users.email).where(Users.email == email).all()
         if user:
             return jsonify({'message': 'Email already has an associated account'}), 400
-
+        new_user = Users(
+                email=email,
+                password = generate_password_hash(password),
+                userid = None
+            )
+        db.session.add(new_user)
         session['username'] = email
-        db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
-        db.commit()
-        #return jsonify({'message': 'Registration successful'})
-        # Handle signup logic here
+        db.session.commit()
         return redirect(url_for('login'))
     return render_template('signup.html')
 
