@@ -170,7 +170,10 @@ def logout():
 
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
-    activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).order_by(func.age(Activities.start_time).asc()).all()
+    if session:
+        user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
+        user_id = user_id[0][0]
+    activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).where(Activities.userid == user_id).order_by(func.age(Activities.start_time).asc()).all()
     if request.method == 'POST':
         print((request.form['task_name']))
         print((request.form['details']))
