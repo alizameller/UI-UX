@@ -134,7 +134,7 @@ def dashboard():
     #print(tasks)
     todays_datetime = (datetime.today()).date(),
     # print(todays_datetime)
-    activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
+    activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).where(Activities.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
     # print(new_activities)
     if request.method == 'POST':
         # prioritized = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color, ((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by((((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).asc()).all()
@@ -146,11 +146,17 @@ def dashboard():
 @app.route('/new_dashboard', methods=['GET', 'POST'])
 def new_dashboard():
     #print(tasks)
+    print(session)
+    if not session:
+      return redirect('/')
+    user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
+    user_id = user_id[0][0]
+
     todays_datetime = (datetime.today()).date(),
     # print(todays_datetime)
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).where(Activities.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
     # print(new_activities)
-    prioritized = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color, ((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by((((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).asc()).all()
+    prioritized = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color, ((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by((((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).asc()).all()
     return render_template('new_dashboard.html', tasks=prioritized, activities=new_activities)
 
 @app.route('/monthly_calendar')

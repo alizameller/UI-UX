@@ -142,7 +142,7 @@
                       body: JSON.stringify({ task_id })
                   }).then(response => {
                       if (response.status == 200){
-                            window.location.href = 'http://127.0.0.1:5000/dashboard'
+                            window.location.href = '/dashboard'
                             Swal.fire("Saved!", "", "success");
                       }
                       else {
