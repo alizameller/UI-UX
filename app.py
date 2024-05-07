@@ -281,5 +281,101 @@ def add_activity():
             return jsonify({'message': message}), 400
     return render_template('add_activity.html')
 
+
+#Hardcoded data for now.
+@app.route('/update_username', methods=['POST'])
+def update_username():
+    try:
+        
+        user_id = 1
+        new_email = "newemail@example.com"
+
+        user = db.session.query(Users).filter_by(userid=user_id).first()
+        if user:
+            current_email = user.email
+            user.email = new_email
+            db.session.commit()
+            return f"Username updated successfully from {current_email} to {new_email}", 200
+        else:
+            return "User not found", 404
+    except Exception as e:
+        db.session.rollback()
+        return f"An error occurred: {str(e)}", 500
+
+
+#Hardcoded data for now.
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    try:
+        
+        user_id = 1
+        new_password = "newPassword123"
+
+        user = db.session.query(Users).filter_by(userid=user_id).first()
+        if user:
+            user.password = new_password
+            db.session.commit()
+            return "Password changed successfully", 200
+        else:
+            return "User not found", 404
+    except Exception as e:
+        db.session.rollback()
+        return f"An error occurred: {str(e)}", 500
+
+#Hardcoded data for now.
+@app.route('/update_task', methods=['POST'])
+def update_task():
+    try:
+        
+        task_id = 1
+        new_task_details = "Completely updated task details"
+        new_task_name = "New Task Name"
+        new_task_duration = timedelta(hours=2)
+        new_deadline = datetime(2024, 12, 31)
+        new_start_time = datetime(2024, 12, 31, 14, 00)
+        new_end_time = datetime(2024, 12, 31, 16, 00)
+        new_activity_id = 2  
+
+        task = db.session.query(Tasks).filter_by(task_id=task_id).first()
+        if task:
+            task.task_name = new_task_name
+            task.task_details = new_task_details
+            task.task_duration = new_task_duration
+            task.deadline = new_deadline
+            task.start_time = new_start_time
+            task.end_time = new_end_time
+            task.activity_id = new_activity_id
+            db.session.commit()
+            return "Task updated successfully", 200
+        else:
+            return "Task not found", 404
+    except Exception as e:
+        db.session.rollback()
+        return f"An error occurred: {str(e)}", 500
+
+
+#Hardcoded data for now.
+@app.route('/update_activity', methods=['POST'])
+def update_activity():
+    try:
+        
+        activity_id = 1
+        new_activity_name = "Updated Comprehensive Activity"
+        new_time = datetime(2024, 12, 25, 10, 00)  
+        new_userid = 3  
+
+        activity = db.session.query(Activities).filter_by(activity_id=activity_id).first()
+        if activity:
+            activity.activity_name = new_activity_name
+            activity.time = new_time
+            activity.userid = new_userid
+            db.session.commit()
+            return "Activity updated successfully", 200
+        else:
+            return "Activity not found", 404
+    except Exception as e:
+        db.session.rollback()
+        return f"An error occurred: {str(e)}", 500
+
 if __name__ == '__main__':
     app.run(debug=True)
