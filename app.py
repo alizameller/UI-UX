@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask import Flask
+from flask import Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 import pyotp
 from sqlalchemy.sql import text
@@ -13,18 +13,13 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'postgresql://postgres:aliza@/final_project'
-    '?host=/cloudsql/nth-bounty-422602-d8:us-central1:task-manager-db'
-)
-
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:password@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
-
 # Placeholder data for demonstration
 # tasks = [
 #     {"id": 1, "activity": "UI/UX", "name": "Homework", "details": "Details of Task 1", "start_time": "2024-04-08T15:40", "end_time": "2024-04-08T17:00", "priority": "High"},
@@ -43,7 +38,7 @@ class Users(Base):
     __tablename__ = 'users'
 
     email = Column(String, primary_key = True)
-    userid = Column(Integer, autoincrement=True)
+    userid = Column(Integer, autoincrement=True, primary_key=True)
     password = Column(String)
 
     def __repr__(self):
@@ -90,13 +85,9 @@ def index():
 def login():
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
         email = data.get('email')
         masterkey = data.get('password')
-        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-        db = engine.connect()
-        cursor = db.execute(text(f'SELECT password FROM users WHERE email = \'{email}\''))
-        password = cursor.fetchall()
+        password = db.session.query(Users.password).where(Users.email == email).all()
         if not password:
             return jsonify({'message': 'User not found'}), 401
         elif not check_password_hash(password[0][0], masterkey):
@@ -110,35 +101,36 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
-        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-        db = engine.connect()
-        cursor = db.execute(text(f'SELECT email FROM users WHERE email = \'{email}\''))
-        user = cursor.fetchall()
-
+        user = db.session.query(Users.email).where(Users.email == email).all()
         if user:
             return jsonify({'message': 'Email already has an associated account'}), 400
-
+        new_user = Users(
+                email=email,
+                password = generate_password_hash(password),
+                userid = None
+            )
+        db.session.add(new_user)
         session['username'] = email
-        db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
-        db.commit()
-        #return jsonify({'message': 'Registration successful'})
-        # Handle signup logic here
+        db.session.commit()
         return redirect(url_for('login'))
     return render_template('signup.html')
 
 @app.route('/dashboard')
 def dashboard():
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
-    # print(new_tasks)
-    todays_datetime = (datetime.today()).date(),
-    print(todays_datetime)
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
-    print(new_activities)
-    return render_template('dashboard.html', tasks=new_tasks, activities=new_activities)
+    print(session)
+    if session:
+        user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
+        user_id = user_id[0][0]
+        new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by(func.age(Tasks.end_time).desc()).all()
+      
+        todays_datetime = (datetime.today()).date()
+        new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).where(Tasks.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
+        return render_template('dashboard.html', tasks=new_tasks, activities=new_activities)
+    else:
+        return redirect('/')
 
 @app.route('/monthly_calendar')
 def monthly_calendar():
@@ -165,6 +157,13 @@ def test_db():
 @app.route('/events')
 def events():
     return render_template('loading.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+
 
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
@@ -280,102 +279,6 @@ def add_activity():
             #flash(message)
             return jsonify({'message': message}), 400
     return render_template('add_activity.html')
-
-
-#Hardcoded data for now.
-@app.route('/update_username', methods=['POST'])
-def update_username():
-    try:
-        
-        user_id = 1
-        new_email = "newemail@example.com"
-
-        user = db.session.query(Users).filter_by(userid=user_id).first()
-        if user:
-            current_email = user.email
-            user.email = new_email
-            db.session.commit()
-            return f"Username updated successfully from {current_email} to {new_email}", 200
-        else:
-            return "User not found", 404
-    except Exception as e:
-        db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
-
-
-#Hardcoded data for now.
-@app.route('/change_password', methods=['POST'])
-def change_password():
-    try:
-        
-        user_id = 1
-        new_password = "newPassword123"
-
-        user = db.session.query(Users).filter_by(userid=user_id).first()
-        if user:
-            user.password = new_password
-            db.session.commit()
-            return "Password changed successfully", 200
-        else:
-            return "User not found", 404
-    except Exception as e:
-        db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
-
-#Hardcoded data for now.
-@app.route('/update_task', methods=['POST'])
-def update_task():
-    try:
-        
-        task_id = 1
-        new_task_details = "Completely updated task details"
-        new_task_name = "New Task Name"
-        new_task_duration = timedelta(hours=2)
-        new_deadline = datetime(2024, 12, 31)
-        new_start_time = datetime(2024, 12, 31, 14, 00)
-        new_end_time = datetime(2024, 12, 31, 16, 00)
-        new_activity_id = 2  
-
-        task = db.session.query(Tasks).filter_by(task_id=task_id).first()
-        if task:
-            task.task_name = new_task_name
-            task.task_details = new_task_details
-            task.task_duration = new_task_duration
-            task.deadline = new_deadline
-            task.start_time = new_start_time
-            task.end_time = new_end_time
-            task.activity_id = new_activity_id
-            db.session.commit()
-            return "Task updated successfully", 200
-        else:
-            return "Task not found", 404
-    except Exception as e:
-        db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
-
-
-#Hardcoded data for now.
-@app.route('/update_activity', methods=['POST'])
-def update_activity():
-    try:
-        
-        activity_id = 1
-        new_activity_name = "Updated Comprehensive Activity"
-        new_time = datetime(2024, 12, 25, 10, 00)  
-        new_userid = 3  
-
-        activity = db.session.query(Activities).filter_by(activity_id=activity_id).first()
-        if activity:
-            activity.activity_name = new_activity_name
-            activity.time = new_time
-            activity.userid = new_userid
-            db.session.commit()
-            return "Activity updated successfully", 200
-        else:
-            return "Activity not found", 404
-    except Exception as e:
-        db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
