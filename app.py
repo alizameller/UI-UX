@@ -13,7 +13,10 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:password@localhost:5432/final_project"
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    'postgresql://postgres:aliza@/final_project'
+    '?host=/cloudsql/nth-bounty-422602-d8:us-central1:task-manager-db'
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -127,7 +130,7 @@ def dashboard():
         new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by(func.age(Tasks.end_time).desc()).all()
       
         todays_datetime = (datetime.today()).date()
-        new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).where(Tasks.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
+        new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).where(Activities.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
         return render_template('dashboard.html', tasks=new_tasks, activities=new_activities)
     else:
         return redirect('/')
