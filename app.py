@@ -118,6 +118,7 @@ def signup():
         if user:
             return jsonify({'message': 'Email already has an associated account'}), 400
 
+        session['username'] = email
         db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
         db.commit()
         #return jsonify({'message': 'Registration successful'})
