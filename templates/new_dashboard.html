@@ -45,7 +45,7 @@
             <div class="container">
                 <div class="header" style="display:flex;">
                     <h1>Task Agenda</h1>
-                    <button type="button" class="button" style="margin-left: auto;" onclick="changeOrder()">Priority View</button>
+                    <button type="button" class="button" style="margin-left: auto; width: 150px;" onclick="changeOrder()">Chronological View</button>
                 </div>
                 <div class="task-list">
                     {% for task in tasks %}
@@ -167,7 +167,7 @@
             }).then(response => {
                 if (response.status == 200){
                     Swal.fire("Success", "", "success"); 
-                    window.location.href = '/new_dashboard'
+                    window.location.href = '/dashboard'
                 }
                 else {
                     Swal.fire("Something went wrong", "", "error");
