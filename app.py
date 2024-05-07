@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask import Flask
+from flask import Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 import pyotp
 from datetime import timedelta
@@ -15,14 +15,13 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:password@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
-
 # Placeholder data for demonstration
 # tasks = [
 #     {"id": 1, "activity": "UI/UX", "name": "Homework", "details": "Details of Task 1", "start_time": "2024-04-08T15:40", "end_time": "2024-04-08T17:00", "priority": "High"},
@@ -41,7 +40,7 @@ class Users(Base):
     __tablename__ = 'users'
 
     email = Column(String, primary_key = True)
-    userid = Column(Integer, autoincrement=True)
+    userid = Column(Integer, autoincrement=True, primary_key=True)
     password = Column(String)
 
     def __repr__(self):
@@ -88,13 +87,9 @@ def index():
 def login():
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
         email = data.get('email')
         masterkey = data.get('password')
-        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-        db = engine.connect()
-        cursor = db.execute(text(f'SELECT password FROM users WHERE email = \'{email}\''))
-        password = cursor.fetchall()
+        password = db.session.query(Users.password).where(Users.email == email).all()
         if not password:
             return jsonify({'message': 'User not found'}), 401
         elif not check_password_hash(password[0][0], masterkey):
@@ -108,40 +103,42 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
-        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-        db = engine.connect()
-        cursor = db.execute(text(f'SELECT email FROM users WHERE email = \'{email}\''))
-        user = cursor.fetchall()
-
+        user = db.session.query(Users.email).where(Users.email == email).all()
         if user:
             return jsonify({'message': 'Email already has an associated account'}), 400
-
+        new_user = Users(
+                email=email,
+                password = generate_password_hash(password),
+                userid = None
+            )
+        db.session.add(new_user)
         session['username'] = email
-        db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
-        db.commit()
-        #return jsonify({'message': 'Registration successful'})
-        # Handle signup logic here
+        db.session.commit()
         return redirect(url_for('login'))
     return render_template('signup.html')
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+    print(session)
+    if !session:
+      return redirect('/)
+    user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
+    user_id = user_id[0][0]
+    tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by(func.age(Tasks.end_time).desc()).all()
     #print(tasks)
     todays_datetime = (datetime.today()).date(),
     # print(todays_datetime)
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
+    activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
     # print(new_activities)
     if request.method == 'POST':
         # prioritized = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color, ((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by((((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).asc()).all()
         # print(prioritized)
         return jsonify({'message': 'Success!'}), 200
     else:
-        tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
-        return render_template('dashboard.html', tasks=tasks, activities=new_activities)
+        return render_template('dashboard.html', tasks=tasks, activities=activities)
 
 @app.route('/new_dashboard', methods=['GET', 'POST'])
 def new_dashboard():
@@ -152,7 +149,6 @@ def new_dashboard():
     # print(new_activities)
     prioritized = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color, ((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by((((datetime.now()-Tasks.end_time) + timedelta(microseconds=1)) - Tasks.task_duration).asc()).all()
     return render_template('new_dashboard.html', tasks=prioritized, activities=new_activities)
-
 
 @app.route('/monthly_calendar')
 def monthly_calendar():
@@ -179,6 +175,13 @@ def test_db():
 @app.route('/events')
 def events():
     return render_template('loading.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+
 
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
