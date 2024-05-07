@@ -15,7 +15,7 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:password@localhost:5432/final_project"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -123,8 +123,8 @@ def signup():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     print(session)
-    if !session:
-      return redirect('/)
+    if not session:
+      return redirect('/')
     user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
     user_id = user_id[0][0]
     tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by(func.age(Tasks.end_time).desc()).all()
@@ -180,8 +180,6 @@ def events():
 def logout():
     session.clear()
     return redirect('/')
-
-
 
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
