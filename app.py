@@ -13,7 +13,11 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    'postgresql://postgres:aliza@/final_project'
+    '?host=/cloudsql/nth-bounty-422602-d8:us-central1:task-manager-db'
+)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -118,6 +122,7 @@ def signup():
         if user:
             return jsonify({'message': 'Email already has an associated account'}), 400
 
+        session['username'] = email
         db.execute(text(f'INSERT INTO users (email, password) VALUES (\'{email}\',\'{generate_password_hash(password)}\')'))
         db.commit()
         #return jsonify({'message': 'Registration successful'})
