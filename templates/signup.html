@@ -10,7 +10,7 @@
     <header class="header">
         <script>
         function handleOnClick() {
-            window.location.href = 'http://127.0.0.1:5000';;
+            window.location.href = '/';;
             }
         </script>
         <h1 onclick="handleOnClick()">task manager</h1>
@@ -42,7 +42,7 @@
             })
             .then(response => {
                 if (response.status == 200){
-                    window.location.href = 'http://127.0.0.1:5000/dashboard'
+                    window.location.href = '/dashboard'
                 }
                 else {
                     alert("Error: " + response.status + "\nEmail already has an associated account")
