@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
             homeButton: {
               text: 'Home',
               click: function() {
-                window.location.href = "http://127.0.0.1:5000/dashboard";
+                window.location.href = "/dashboard";
               }
             }
         },

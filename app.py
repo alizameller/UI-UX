@@ -166,7 +166,7 @@ def monthly_calendar():
     user_id = user_id[0][0]
     # Render your monthly_calendar.html template
     new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by(func.age(Tasks.end_time).desc()).all()
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time, Activities.color).where(Tasks.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
+    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time, Activities.color).where(Activities.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
     return render_template('monthly_calendar.html', activities=new_activities, tasks = new_tasks)
 
 @app.route('/loading')
