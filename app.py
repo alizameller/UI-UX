@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask import Flask
+from flask import Flask, make_response
 from flask_sqlalchemy import SQLAlchemy
 import pyotp
 from sqlalchemy.sql import text
@@ -20,7 +20,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
-
 # Placeholder data for demonstration
 # tasks = [
 #     {"id": 1, "activity": "UI/UX", "name": "Homework", "details": "Details of Task 1", "start_time": "2024-04-08T15:40", "end_time": "2024-04-08T17:00", "priority": "High"},
@@ -121,13 +120,17 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
-    new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).order_by(func.age(Tasks.end_time).desc()).all()
-    # print(new_tasks)
-    todays_datetime = (datetime.today()).date(),
-    print(todays_datetime)
-    new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).order_by(func.age(Activities.start_time).desc()).all()
-    print(new_activities)
-    return render_template('dashboard.html', tasks=new_tasks, activities=new_activities)
+    print(session)
+    if session:
+        user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
+        user_id = user_id[0][0]
+        new_tasks = db.session.query(Tasks.task_id, Tasks.task_name, Tasks.task_details, Tasks.task_duration, Tasks.deadline, Tasks.start_time, Tasks.end_time, Activities.activity_name, Activities.color).join(Activities, (Tasks.activity_id == Activities.activity_id)).where(Tasks.userid == user_id).order_by(func.age(Tasks.end_time).desc()).all()
+      
+        todays_datetime = (datetime.today()).date()
+        new_activities = db.session.query(Activities.activity_id, Activities.activity_name, Activities.activity_details, Activities.start_time, Activities.end_time).filter(func.date(Activities.start_time) == todays_datetime).where(Tasks.userid == user_id).order_by(func.age(Activities.start_time).desc()).all()
+        return render_template('dashboard.html', tasks=new_tasks, activities=new_activities)
+    else:
+        return redirect('/')
 
 @app.route('/monthly_calendar')
 def monthly_calendar():
@@ -154,6 +157,13 @@ def test_db():
 @app.route('/events')
 def events():
     return render_template('loading.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+
 
 @app.route('/add_task', methods=['GET', 'POST'])
 def add_task():
