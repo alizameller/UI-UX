@@ -31,7 +31,7 @@
         <a href="/add_task">Add Task</a>
         <a href="/add_activity">Add Activity</a>
         <a href="#">Settings</a>
-        <a href="/logout">Logout</a>
+        <a href="/">Logout</a>
     </div>
     <!-- Use any element to open the sidenav -->
     <!-- <span class="fa fa-bars" id="menuBars" onclick="openNav()"></span> -->
@@ -45,7 +45,7 @@
             <div class="container">
                 <div class="header" style="display:flex;">
                     <h1>Task Agenda</h1>
-                    <button type="button" class="button" style="margin-left: auto;" onclick="changeOrder()">Priority View</button>
+                    <button type="button" class="button" style="margin-left: auto; width: 150px;" onclick="changeOrder()">Chronological View</button>
                 </div>
                 <div class="task-list">
                     {% for task in tasks %}
@@ -167,7 +167,7 @@
             }).then(response => {
                 if (response.status == 200){
                     Swal.fire("Success", "", "success"); 
-                    window.location.href = '/new_dashboard'
+                    window.location.href = '/dashboard'
                 }
                 else {
                     Swal.fire("Something went wrong", "", "error");
