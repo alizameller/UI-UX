@@ -49,3 +49,8 @@ Press CTRL+C to quit
 ```
 Open the url: http://127.0.0.1:5000
 
+https://github.com/alizameller/UI-UX/assets/49292194/f45f39b3-4e04-45c8-b1e2-54c89097332d
+
+
+
+
