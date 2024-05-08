@@ -1,4 +1,4 @@
-# UI-UX
+# task manager
 ## Instructions
 ### Clone the repository 
 
