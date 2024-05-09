@@ -6,7 +6,7 @@ from datetime import timedelta
 import datetime
 from sqlalchemy.sql import text, cast
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import create_engine, text, Integer, String, Column, DateTime, ForeignKey, PrimaryKeyConstraint, func, select
+from sqlalchemy import create_engine, text, Integer, String, Column, DateTime, ForeignKey, PrimaryKeyConstraint, func, select, update
 from sqlalchemy.orm import sessionmaker, declarative_base, backref, relationship
 from datetime import datetime, timedelta
 
@@ -15,11 +15,11 @@ db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'alizameller'
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'postgresql://postgres:aliza@/final_project'
-    '?host=/cloudsql/nth-bounty-422602-d8:us-central1:task-manager-db'
-)
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
+# app.config['SQLALCHEMY_DATABASE_URI'] = (
+#     'postgresql://postgres:aliza@/final_project'
+#     '?host=/cloudsql/nth-bounty-422602-d8:us-central1:task-manager-db'
+# )
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://alizameller:@localhost:5432/final_project"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SESSION_COOKIE_SECURE'] = True
 # app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -311,6 +311,39 @@ def add_activity():
             #flash(message)
             return jsonify({'message': message}), 400
     return render_template('add_activity.html')
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'POST':
+        if not session:
+            return redirect('/')
+        
+        user_id = db.session.query(Users.userid).where(Users.email == session['username']).all()
+        user_id = user_id[0][0]
+        print(request.form['email'])
+        print(request.form['password'])
+        email = request.form['email']
+        password = request.form['password']
+        
+        try:
+            if email:
+                db.session.query(Users).filter(Users.userid == user_id).update(values = {'email': email})
+                session['username'] = email
+            if password:
+                db.session.query(Users).filter(Users.userid == user_id).update(values = {'password': generate_password_hash(password)})
+            print('here')
+            db.session.commit()
+            return jsonify({'message': 'Settings changed successfully!'}), 200
+
+        except Exception as e:
+            db.session.rollback()
+            message = "Unknown Error"
+            if (type(e).__name__) == "IntegrityError":
+                message = "An internal error occured. \nPlease try again."
+            if (type(e).__name__) == "ValueError":
+                message = "An invalid datetime value was entered. \nPlease select a date from the dropdown calendar."
+            return jsonify({'message': message}), 400
+    return render_template('settings.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
