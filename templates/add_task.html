@@ -44,7 +44,7 @@
                     <input type="text" id="details" name="details" placeholder="Details of Task">
                   
                     <label for="activity">Activity</label>
-                    <select id="activity" name="activity">
+                    <select id="activity" name="activity" required="required">
                         {% for activity in activities %}
                         <script>
                             var option = document.createElement('option');
@@ -54,7 +54,7 @@
                             script.parentElement.insertBefore(option, script); 
                         </script>
                         {% endfor %}
-                        <option value="">None</option>
+                        <!-- <option value="">None</option> -->
                         <!-- <option value="Databases">Databases</option>
                         <option value="Senior Projects">Senior Projects</option>
                         <option value="UI/UX">UI/UX</option>
